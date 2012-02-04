@@ -299,6 +299,12 @@ public class CSVExporter {
 		csvLine += children2String(expr, false);
 		csvLine +=  ")";
 		System.out.println(csvLine);
+	
+		traverseChildren(forInitStatement, level);
+		traverseChildren(condition, level);
+		traverseChildren(expr, level);
+		
+	
 	}
 
 	private static void handleIfOrWhile(CommonTreeWithLines node, int level, String keywordStr)
@@ -313,6 +319,8 @@ public class CSVExporter {
 		csvLine += separator + level;
 		csvLine += separator + "(" + children2String(condition, false) + ")";
 		System.out.println(csvLine);
+	
+		traverseChildren(condition, level);
 	}
 	
 	private static void handleElse(CommonTreeWithLines node, int level)
@@ -383,6 +391,8 @@ public class CSVExporter {
 			csvLine += separator + startPos + separator + name;
 			csvLine += separator + children2String(argument, false);
 			System.out.println(csvLine);
+		
+			traverseChildren(argument, level);
 		}
 	}
 
