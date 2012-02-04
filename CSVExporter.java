@@ -437,22 +437,39 @@ public class CSVExporter {
 		if(nChildren == 0) return "";
 		
 		CommonTreeWithLines firstChild = (CommonTreeWithLines) node.getChild(0);
-		String retval;
-		if(isLeaf(firstChild))
-			retval = node.getChild(0).toString();
-		else
+		String retval = "";
+		if(isLeaf(firstChild)){
+			if(shouldPrintChild(firstChild.toString()))
+				retval = node.getChild(0).toString();
+		}else
 			retval = children2String(firstChild, addSpace);
 		
 		for(int i = 1; i < node.getChildCount(); i++){
 			CommonTreeWithLines child = (CommonTreeWithLines)node.getChild(i);
 			if(isLeaf(child)){
 				if(addSpace) retval += " ";
-				if(! child.toString().equals("CALL_TEMPLATE_LIST"))
+				
+				if(shouldPrintChild(child.toString()))
 				    retval += child.toString();
 			}
-			else retval += children2String(child, addSpace);
+			else
+				retval += children2String(child, addSpace);
 		}
 		return retval;
+	}
+
+	private static boolean shouldPrintChild(String s)
+        {
+		if(s.equals("CALL_TEMPLATE_LIST"))
+			return false;
+		if(s.equals("TYPE_DEF"))
+			return false;
+		if(s.equals("TEMPLATE_DECL_SPECIFIER"))
+			return false;
+		if(s.equals("CLASS_DEF"))
+			return false;
+		
+		return true;
 	}
 
 	private static void traverseChildren(CommonTreeWithLines node, int level)
