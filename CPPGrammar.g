@@ -184,7 +184,7 @@ expr_elem:  (recognized_expr) => recognized_expr
                 | no_brackets_or_semicolon;
 
 recognized_expr: function_call;
-function_call_:  called_function call_template_list  function_argument_list -> called_function ^(CALL_TEMPLATE_LIST call_template_list?)  function_argument_list;
+function_call_:  called_function call_template_list function_argument_list -> called_function ^(CALL_TEMPLATE_LIST call_template_list?)  function_argument_list;
 call_template_list: ('<' template_param_list '>' )?;
 function_argument_list: function_argument_list_ -> ^(ARGUMENT_LIST function_argument_list_?);
 function_argument_list_: '(' ( function_argument (',' function_argument)* )? ')';

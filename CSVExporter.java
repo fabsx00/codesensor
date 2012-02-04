@@ -437,7 +437,8 @@ public class CSVExporter {
 			CommonTreeWithLines child = (CommonTreeWithLines)node.getChild(i);
 			if(isLeaf(child)){
 				if(addSpace) retval += " ";
-				retval += child.toString();
+				if(! child.toString().equals("CALL_TEMPLATE_LIST"))
+				    retval += child.toString();
 			}
 			else retval += children2String(child, addSpace);
 		}
