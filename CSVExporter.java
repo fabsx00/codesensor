@@ -294,9 +294,9 @@ public class CSVExporter {
 		csvLine += "for" + separator +  keywordToken.getLine() + ":" + keywordToken.getCharPositionInLine();
 		csvLine += separator + terminator.getLine() + ":" + terminator.getCharPositionInLine();
 		csvLine += separator + level;
-		csvLine += separator + "(" + children2String(forInitStatement, false);
-		csvLine += children2String(condition, false) + ";";
-		csvLine += children2String(expr, false);
+		csvLine += separator + "(" + children2String(forInitStatement, true);
+		csvLine += children2String(condition, true) + ";";
+		csvLine += children2String(expr, true);
 		csvLine +=  ")";
 		System.out.println(csvLine);
 	
@@ -317,7 +317,7 @@ public class CSVExporter {
 		csvLine += keywordStr + separator +  keywordToken.getLine() + ":" + keywordToken.getCharPositionInLine();
 		csvLine += separator + terminator.getLine() + ":" + terminator.getCharPositionInLine();
 		csvLine += separator + level;
-		csvLine += separator + "(" + children2String(condition, false) + ")";
+		csvLine += separator + "(" + children2String(condition, true) + ")";
 		System.out.println(csvLine);
 	
 		traverseChildren(condition, level);
