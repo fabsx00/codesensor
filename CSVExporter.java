@@ -182,7 +182,7 @@ public class CSVExporter {
 		csvLine += separator + className;
 		System.out.println(csvLine);
 
-		traverseChildren(classContentNode, level);
+		traverseChildren(classContentNode, level + 1);
 		return className;
 	}
 
