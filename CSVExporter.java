@@ -175,7 +175,7 @@ public class CSVExporter {
 		else
 			className = "<anonymous_" + startPos + ">";
 		
-		String csvLine = "class" + separator + startPos;
+		String csvLine = classKeyNode.toString() + separator + startPos;
 		csvLine += separator + endPos;
 		csvLine += separator + level;
 		csvLine += separator + className;
