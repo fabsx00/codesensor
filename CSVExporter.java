@@ -37,7 +37,6 @@ public class CSVExporter {
 			
 		} catch (Exception e) {
 			e.printStackTrace();
-			// System.in.read();
 		}
 	}
 
@@ -186,14 +185,6 @@ public class CSVExporter {
 		return className;
 	}
 
-	private static void handleVarDeclWithType(CommonTreeWithLines node,
-			int level)
-	{
-		// TODO Auto-generated method stub
-		
-	}
-
-
 	private static void handleFunctionDef(CommonTreeWithLines node, int level)
 	{
 		CommonTreeWithLines returnType = (CommonTreeWithLines) node.getChild(1);
@@ -223,7 +214,7 @@ public class CSVExporter {
 	}
 	
 	private static void handleParameterList(CommonTreeWithLines parameterList,
-											String name, String startPos, int level)
+						String name, String startPos, int level)
 	{
 		int nChildren = parameterList.getChildCount();
 		if(nChildren <= 2)
@@ -485,8 +476,6 @@ public class CSVExporter {
 	{
 		return (node.getChildCount() == 0);
 	}
-	
-	
 	
 	
 }
