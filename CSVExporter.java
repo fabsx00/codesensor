@@ -208,9 +208,9 @@ public class CSVExporter {
 		csvLine += separator + returnTypeStr + separator + nameStr;
 		System.out.println(csvLine);
 
-		handleParameterList(parameterList, nameStr, startPos, level);
+		handleParameterList(parameterList, nameStr, startPos, level + 1);
 		
-		traverseChildren(functionContent, level);		
+		traverseChildren(functionContent, level + 1);		
 	}
 	
 	private static void handleParameterList(CommonTreeWithLines parameterList,
