@@ -396,7 +396,9 @@ public class CSVExporter {
 		String endPos = closingNode.getLine() + ":" + closingNode.getCharPositionInLine();
 		
 		String csvLine = "label" + separator + startPos;
-		csvLine += separator + endPos + separator + labelStr;
+		csvLine += separator + endPos;
+		csvLine += separator + level;
+		csvLine += separator + labelStr;
 		System.out.println(csvLine);
 	}	
 	
