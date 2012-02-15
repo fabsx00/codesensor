@@ -279,7 +279,7 @@ STRING: ('\'' ( ('\\' . ) | ~('\\' | '\'') )* '\'' ) // { $channel = HIDDEN; };
 
 
 PREPROC
-    : '#'  ( options {greedy=false; }: .)* '\n' {$channel = HIDDEN; }
+    : '#'  ( options {greedy=false; }: .)* ~('\\') '\n' {$channel = HIDDEN; }
     ;
 
 WHITESPACE: (' ' | '\t' | '\n' | '\r')+ {$channel = HIDDEN; };
