@@ -208,13 +208,13 @@ public class CSVExporter {
 		csvLine += separator + returnTypeStr + separator + nameStr;
 		System.out.println(csvLine);
 
-		handleParameterList(parameterList, nameStr, startPos, level + 1);
+		handleParameterList(parameterList, level + 1);
 		
 		traverseChildren(functionContent, level + 1);		
 	}
 	
 	private static void handleParameterList(CommonTreeWithLines parameterList,
-						String name, String startPos, int level)
+						int level)
 	{
 		int nChildren = parameterList.getChildCount();
 		if(nChildren <= 2)
@@ -228,7 +228,6 @@ public class CSVExporter {
 			String csvLine = "param" + separator + paramType.getLine() + ":" + paramType.getCharPositionInLine();
 			csvLine += separator + terminator.getLine() + ":" + terminator.getCharPositionInLine();
 			csvLine += separator + level;
-			csvLine += separator + startPos + separator + name;
 			csvLine += separator + children2String(paramType, true);
 			if(paramName != null)
 				 csvLine += separator + children2String(paramName, false);
@@ -356,18 +355,17 @@ public class CSVExporter {
 		csvLine += separator + terminator.getLine() + ":" + terminator.getCharPositionInLine();
 		csvLine += separator + level;
 		csvLine += separator + calleeStr;
-		csvLine += separator + "(" + children2String(argumentList, false) + ")";
+		// csvLine += separator + "(" + children2String(argumentList, false) + ")";
 		System.out.println(csvLine);
 		
-		handleArgumentList(argumentList, calleeStr, calleePos, level);
+		handleArgumentList(argumentList, level + 1);
 		// parse expressions contained in arguments
 		traverseChildren(argumentList, level);
 	}
 	
 	
 	
-	private static void handleArgumentList(CommonTreeWithLines argumentList,
-									String name, String startPos, int level)
+	private static void handleArgumentList(CommonTreeWithLines argumentList, int level)
 	{
 		int nChildren = argumentList.getChildCount();
 		if(nChildren <= 2)
@@ -379,7 +377,6 @@ public class CSVExporter {
 			String csvLine = "arg" + separator + argument.getLine() + ":" + argument.getCharPositionInLine();
 			csvLine += separator + terminator.getLine() + ":" + terminator.getCharPositionInLine();
 			csvLine += separator + level;
-			csvLine += separator + startPos + separator + name;
 			csvLine += separator + children2String(argument, false);
 			System.out.println(csvLine);
 		
