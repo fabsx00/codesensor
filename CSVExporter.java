@@ -405,7 +405,6 @@ public class CSVExporter {
 		
 		CommonTreeWithLines lastChild = (CommonTreeWithLines)node.getChild(node.getChildCount() - 1);
 		String lastChildText = lastChild.toString();
-		System.out.println(lastChildText);
 		
 		if(lastChildText.equals(";")) return lastChild;
 		if(lastChildText.equals("}")) return lastChild;
