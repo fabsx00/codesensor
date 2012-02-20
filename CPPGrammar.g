@@ -134,7 +134,7 @@ non_expr_statement: selection_statement | iteration_statement | jump_statement
   | simple_decl | label;
 
 expr_statement:  (recognized_expr  ';') => recognized_expr ';'
-  |  expr_statement_water (statement | ';');
+  |  expr_statement_water+ compound_statement* ';';
 
 expr_statement_water: expr_statement_water_ ->^(SW expr_statement_water_);
 expr_statement_water_: ~('{' | '}' | ';');
