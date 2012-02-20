@@ -124,7 +124,7 @@ param_decl_specifiers: ('auto' | 'register')? type_specifier;
 
 // statement
 compound_statement: '{' statement* '}' -> '{' ^(STATEMENTS statement*) '}';
-statement: (compound_statement | non_compound_statement | ';');
+statement: (compound_statement | non_compound_statement);
 
 non_compound_statement:  (non_expr_statement) => non_expr_statement
   | expr_statement;
@@ -134,7 +134,7 @@ non_expr_statement: selection_statement | iteration_statement | jump_statement
   | simple_decl | label;
 
 expr_statement:  (recognized_expr  ';') => recognized_expr ';'
-  |  expr_statement_water (statement);
+  |  expr_statement_water statement ';';
 
 expr_statement_water: expr_statement_water_ ->^(SW expr_statement_water_);
 expr_statement_water_: ~('{' | '}' | ';');
