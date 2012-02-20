@@ -134,7 +134,7 @@ non_expr_statement: selection_statement | iteration_statement | jump_statement
   | simple_decl | label;
 
 expr_statement:  (recognized_expr  ';') => recognized_expr ';'
-  |  expr_statement_water (expr_statement | ';');
+  |  expr_statement_water;
 
 expr_statement_water: expr_statement_water_ ->^(SW expr_statement_water_);
 expr_statement_water_: ~('{' | '}' | ';');
@@ -164,7 +164,7 @@ do_statement: k='do' statement 'while' '(' expr ')' -> ^(KEYWORD $k) ^(CONDITION
 condition_: (type_specifier identifier '=' assignment_expr)=> (type_specifier identifier '=' assignment_expr) | expr;
 for_init_statement : (simple_decl) => simple_decl | expr? ';';
 
-label_: (('case'? ALPHA_NUMERIC) | access_specifier) ':' ;
+label_: (('case'? (ALPHA_NUMERIC | DIGITS | '::')+ ) | access_specifier) ':' ;
 
 type_id_list: no_brackets* ('(' type_id_list ')' no_brackets*)*;
 namespace_def_: 'namespace' identifier? '{' namespace_content '}';
