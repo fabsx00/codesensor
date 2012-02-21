@@ -124,7 +124,7 @@ param_decl_specifiers: ('auto' | 'register')? type_specifier;
 
 // statement
 compound_statement: '{' statement* '}' -> '{' ^(STATEMENTS statement*) '}';
-statement: (compound_statement | non_compound_statement);
+statement: (compound_statement | non_compound_statement | ';');
 
 non_compound_statement:  (non_expr_statement) => non_expr_statement
   | expr_statement;
