@@ -88,11 +88,33 @@ public class CSVExporter {
 		case CPPGrammarParser.SIMPLE_DECL:
 			handleSimpleDecl(node, level);
 			break;
+		case CPPGrammarParser.SW:
+			handleStatementWater(node, level);
+		    break;
+
 		default:
 			traverseChildren(node, level);
 		};	
 	}
 	
+	private static void handleStatementWater(CommonTreeWithLines node, int level)
+	{
+		// type, start position, end position, level, text
+		CommonTreeWithLines swContentNode = (CommonTreeWithLines) node.getChild(0);
+		String startPos =
+			swContentNode.getLine() + ":" + swContentNode.getCharPositionInLine();
+		
+		String content = swContentNode.toString();
+		String endPos = "0:0";
+		
+		String csvLine = "statementW" + separator + startPos;
+		csvLine += separator + endPos;
+		csvLine += separator + level;
+		csvLine += separator + content;
+		System.out.println(csvLine);		
+	}
+
+
 	private static void handleSimpleDecl(CommonTreeWithLines node, int level)
 	{
 		CommonTreeWithLines typedefNode = (CommonTreeWithLines) node.getChild(0);
