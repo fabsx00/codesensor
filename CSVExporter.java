@@ -107,7 +107,7 @@ public class CSVExporter {
 		String content = swContentNode.toString();
 		String endPos = "0:0";
 		
-		String csvLine = "statementW" + separator + startPos;
+		String csvLine = "water" + separator + startPos;
 		csvLine += separator + endPos;
 		csvLine += separator + level;
 		csvLine += separator + content;
