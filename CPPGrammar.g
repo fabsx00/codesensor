@@ -176,7 +176,7 @@ namespace_content_elem: (simple_decl) => simple_decl
   | (function_def) => function_def
   | no_curlies;
   
-type_specifier: cv_qualifier* class_key? ALPHA_NUMERIC ('<' template_param_list '>' )? ('::' ALPHA_NUMERIC ('<' template_param_list '>' )?)* ;
+type_specifier: cv_qualifier* class_key? ('unsigned' | 'signed')? ALPHA_NUMERIC ('<' template_param_list '>' )? ('::' ALPHA_NUMERIC ('<' template_param_list '>' )?)* ;
 template_param_list : no_angle_brackets* ('<' template_param_list '>' no_angle_brackets*)*;
 
 // Expressions
