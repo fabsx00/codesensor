@@ -21,16 +21,18 @@ import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTreeAdaptor;
 
+import java.util.HashMap;
 import java.io.*;
 
 
 public class CSVExporter {
 	
 	static final String separator = "\t";
+	static HashMap<String,Integer> operatorMap;
 	
-	public static void main(String[] args) throws IOException
-	{		
+	public static void main(String[] args) throws IOException{		
 		try{
+			initializeOperatorMap();
 			String inputFilename = parseCommandLine(args);
 			CPPGrammarParser.code_return ast = parseFile(inputFilename);
 			traverse((CommonTreeWithLines)ast.tree, 0);
@@ -40,8 +42,34 @@ public class CSVExporter {
 		}
 	}
 
-	private static String parseCommandLine(String[] args) throws Exception
-	{
+	static void initializeOperatorMap() throws Exception{		
+		operatorMap = new HashMap<String,Integer>();
+		operatorMap.put("+", 1); operatorMap.put("-", 1); operatorMap.put("*", 1);
+		operatorMap.put("/", 1); operatorMap.put("%", 1);			
+		operatorMap.put("++", 1); operatorMap.put("--", 1); operatorMap.put("=", 1);
+		operatorMap.put("+=", 1); operatorMap.put("-=", 1); operatorMap.put("%=", 1);
+		operatorMap.put("*=", 1); operatorMap.put("/=", 1); operatorMap.put("&=", 1);		
+		operatorMap.put("<<=", 1); operatorMap.put(">>=", 1); operatorMap.put("^=", 1);
+		operatorMap.put("|=", 1);						
+		operatorMap.put("==", 1); operatorMap.put("!=", 1); operatorMap.put("<=", 1);
+		operatorMap.put(">=", 1); operatorMap.put("<", 1); operatorMap.put(">", 1);
+		operatorMap.put("&&", 1); operatorMap.put("||", 1); operatorMap.put("!", 1);
+		
+		operatorMap.put("&", 1); operatorMap.put("|", 1); operatorMap.put("^", 1);
+		operatorMap.put("~", 1); operatorMap.put("<<", 1); operatorMap.put(">>", 1);
+
+		operatorMap.put("*", 1); operatorMap.put(".", 1); operatorMap.put("->", 1);
+		operatorMap.put("::", 1); operatorMap.put(".*", 1); operatorMap.put("->*", 1);
+		operatorMap.put("&", 1); operatorMap.put("sizeof", 1); operatorMap.put("new", 1);
+		operatorMap.put("delete", 1); operatorMap.put("[", 1); operatorMap.put("]", 1);
+		
+	}
+    
+	static boolean isOperator(String s){
+		return operatorMap.containsKey(s);
+	}
+
+	private static String parseCommandLine(String[] args) throws Exception{
 		if(args.length != 1){
 			throw new Exception("filename required.");
 		}
@@ -49,8 +77,7 @@ public class CSVExporter {
 	}
 	
 	private static CPPGrammarParser.code_return parseFile(String inputFilename)
-			throws IOException, RecognitionException
-	{
+		throws IOException, RecognitionException{
 		
 		ANTLRFileStream antlrFileStream = new ANTLRFileStream(inputFilename) ;
 		CPPGrammarLexer lexer = new CPPGrammarLexer(antlrFileStream);
@@ -64,8 +91,13 @@ public class CSVExporter {
 	}
 
 	
-	private static void traverse(CommonTreeWithLines node, int level)	
-	{
+	private static void traverse(CommonTreeWithLines node, int level){
+	    
+	    if(isLeaf(node)){
+		outputLeafNode(node, level);
+		return;
+	    }		
+		
 		switch(node.getType()){
 		case CPPGrammarParser.FUNCTION_DEF:
 			handleFunctionDef(node, level);
@@ -90,31 +122,79 @@ public class CSVExporter {
 			break;
 		case CPPGrammarParser.SW:
 			handleStatementWater(node, level);
-		    break;
-
+			break;
+			
 		default:
 			traverseChildren(node, level);
 		};	
 	}
-	
-	private static void handleStatementWater(CommonTreeWithLines node, int level)
+
+	private static void handleSelection(CommonTreeWithLines node, int level)
 	{
-		// type, start position, end position, level, text
-		CommonTreeWithLines swContentNode = (CommonTreeWithLines) node.getChild(0);
-		String startPos =
-			swContentNode.getLine() + ":" + swContentNode.getCharPositionInLine();
+		CommonTreeWithLines keyword = (CommonTreeWithLines) node.getChild(0);
 		
-		String content = swContentNode.toString();
-		String endPos = "0:0";
+		String keywordStr = children2String(keyword, false);
 		
-		String csvLine = "water" + separator + startPos;
+		if(keywordStr.equals("if") || keywordStr.equals("switch")){
+			CommonTreeWithLines statements = (CommonTreeWithLines) node.getChild(2);
+			handleIfOrWhile(node, level, keywordStr);		
+			traverseChildren(statements, level + 1);
+		}else if(keywordStr.equals("else")){
+			CommonTreeWithLines statements = (CommonTreeWithLines) node.getChild(1);
+			handleElse(node, level);
+			traverseChildren(statements, level + 1);
+		}
+		
+	}
+
+	private static void handleIteration(CommonTreeWithLines node, int level)
+	{
+		CommonTreeWithLines keyword = (CommonTreeWithLines) node.getChild(0);		
+		String keywordStr = children2String(keyword, false);
+		
+		if(keywordStr.equals("while") || keywordStr.equals("do")){
+			CommonTreeWithLines statements = (CommonTreeWithLines) node.getChild(2);
+			handleIfOrWhile(node, level, keywordStr);		
+			traverseChildren(statements, level + 1);
+		}else if(keywordStr.equals("for")){
+			CommonTreeWithLines statements = (CommonTreeWithLines) node.getChild(5);
+			handleFor(node, level);		
+			traverseChildren(statements, level + 1);
+		}
+		
+	}
+		
+	static void outputCSVRow(String rowType, String startPos, String endPos, String level, String content){
+		String csvLine = rowType;
+		
+		csvLine += separator + startPos;
 		csvLine += separator + endPos;
 		csvLine += separator + level;
 		csvLine += separator + content;
 		System.out.println(csvLine);		
 	}
-
-
+	
+	
+	private static void handleStatementWater(CommonTreeWithLines node, int level){
+		// type, start position, end position, level, text
+		CommonTreeWithLines swContentNode = (CommonTreeWithLines) node.getChild(0);				
+		outputLeafNode(swContentNode, level);
+	}
+	
+	static void outputLeafNode(CommonTreeWithLines node, int level){
+		
+		if(!shouldPrintChild(node.toString())) return;
+		
+		String startPos = node.getLine() + ":" + node.getCharPositionInLine();
+		String endPos = "0:0";
+		String content = node.toString();						
+		String rowType;
+		if(isOperator(content)) rowType = "op";
+		else rowType = "water";
+		outputCSVRow(rowType, startPos, endPos, Integer.toString(level), content);
+	}
+	
+	
 	private static void handleSimpleDecl(CommonTreeWithLines node, int level)
 	{
 		CommonTreeWithLines typedefNode = (CommonTreeWithLines) node.getChild(0);
@@ -139,49 +219,44 @@ public class CSVExporter {
 			return;
 		}
 		
+		// INIT_DECL_LIST
 		for(int i = 0; i < initDeclNode.getChildCount(); i++){
 			CommonTreeWithLines declName = (CommonTreeWithLines) initDeclNode.getChild(i);
 			
 			if(declName.getType() != CPPGrammarParser.INIT_DECL_NAME){
-				traverseChildren(declName, level);
+				
+				if(isLeaf(declName))
+					outputLeafNode(declName, level);
+				else				
+				    traverseChildren(declName, level);
+				
 				continue;
 			}
 			
-			String declNameStr = children2String(declName, false);
-			
+			String declNameStr = children2String(declName, false);			
 			String startPos = startNode.getLine() + ":" + startNode.getCharPositionInLine();
 			String endPos = terminatorNode.getLine() + ":" + terminatorNode.getCharPositionInLine();
+			String content = typeStr + separator + declNameStr;
 			
-			String csvLine = "decl" + separator + startPos;
-			csvLine += separator + endPos;
-			csvLine += separator + level;
-			csvLine += separator + typeStr;
-			csvLine += separator + declNameStr;
-			System.out.println(csvLine);
+			outputCSVRow("decl", startPos, endPos, Integer.toString(level), content);												
 		}
 		
 	}
 
 	private static void handleTypeDef(CommonTreeWithLines node, String typeStr,
-			int level)
-	{
+					  int level){
 		CommonTreeWithLines typedefNode = (CommonTreeWithLines) node.getChild(0);
 		CommonTreeWithLines initDeclNode = (CommonTreeWithLines) node.getChild(4);
 		CommonTreeWithLines terminatorNode = (CommonTreeWithLines) node.getChild(5);
 		
 		String startPos = typedefNode.getLine() + ":" + typedefNode.getCharPositionInLine();
-		String endPos = terminatorNode.getLine() + ":" + terminatorNode.getCharPositionInLine();
+		String endPos = terminatorNode.getLine() + ":" + terminatorNode.getCharPositionInLine();				
+		String content = typeStr + separator + children2String(initDeclNode, false);
 		
-		String csvLine = "typedef" + separator + startPos;
-		csvLine += separator + endPos;
-		csvLine += separator + level;
-		csvLine += separator + typeStr;
-		csvLine += separator + children2String(initDeclNode, false);
-		System.out.println(csvLine);
+		outputCSVRow("typedef", startPos, endPos, Integer.toString(level), content);		
 	}
 
-	private static String handleClassDef(CommonTreeWithLines node, int level)
-	{
+	private static String handleClassDef(CommonTreeWithLines node, int level){
 		CommonTreeWithLines classKeyNode = (CommonTreeWithLines) node.getChild(0);
 		CommonTreeWithLines classNameNode = (CommonTreeWithLines) node.getChild(1);
 		CommonTreeWithLines baseClassesNode = (CommonTreeWithLines) node.getChild(2);
@@ -197,12 +272,11 @@ public class CSVExporter {
 		else
 			className = "<anonymous_" + startPos + ">";
 		
-		String csvLine = classKeyNode.toString() + separator + startPos;
-		csvLine += separator + endPos;
-		csvLine += separator + level;
-		csvLine += separator + className;
-		System.out.println(csvLine);
+		String classKey = classKeyNode.toString();
+		String content = className;
 
+		outputCSVRow(classKey, startPos, endPos, Integer.toString(level), content);
+		
 		traverseChildren(classContentNode, level + 1);
 		return className;
 	}
@@ -224,14 +298,12 @@ public class CSVExporter {
 		else
 			startPos = name.getLine() + ":" + name.getCharPositionInLine();
 		
-		String csvLine = "func" + separator + startPos;
-		csvLine += separator + closingTag.getLine() + ":" + closingTag.getCharPositionInLine();
-		csvLine += separator + level;
-		csvLine += separator + returnTypeStr + separator + nameStr;
-		System.out.println(csvLine);
-
-		handleParameterList(parameterList, level + 1);
+		String endPos = closingTag.getLine() + ":" + closingTag.getCharPositionInLine();
+		String content = returnTypeStr + separator + nameStr;
 		
+		outputCSVRow("func", startPos, endPos, Integer.toString(level), content);
+		
+		handleParameterList(parameterList, level + 1);		
 		traverseChildren(functionContent, level + 1);		
 	}
 	
@@ -247,53 +319,17 @@ public class CSVExporter {
 			CommonTreeWithLines paramType = (CommonTreeWithLines) paramDecl.getChild(0);
 			CommonTreeWithLines paramName = (CommonTreeWithLines) paramDecl.getChild(1);
 			
-			String csvLine = "param" + separator + paramType.getLine() + ":" + paramType.getCharPositionInLine();
-			csvLine += separator + terminator.getLine() + ":" + terminator.getCharPositionInLine();
-			csvLine += separator + level;
-			csvLine += separator + children2String(paramType, true);
+			String startPos = paramType.getLine() + ":" + paramType.getCharPositionInLine();
+			String endPos = terminator.getLine() + ":" + terminator.getCharPositionInLine();
+			String content = children2String(paramType, true);
+			
 			if(paramName != null)
-				 csvLine += separator + children2String(paramName, false);
-			System.out.println(csvLine);
+				content += separator + children2String(paramName, false);
+						
+			outputCSVRow("param", startPos, endPos, Integer.toString(level), content);						
 		}
 	}
-
-	private static void handleSelection(CommonTreeWithLines node, int level)
-	{
-		CommonTreeWithLines keyword = (CommonTreeWithLines) node.getChild(0);
-		
-		String keywordStr = children2String(keyword, false);
-		
-		if(keywordStr.equals("if") || keywordStr.equals("switch")){
-			CommonTreeWithLines statements = (CommonTreeWithLines) node.getChild(2);
-			handleIfOrWhile(node, level, keywordStr);		
-			traverseChildren(statements, level + 1);
-		}else if(keywordStr.equals("else")){
-			CommonTreeWithLines statements = (CommonTreeWithLines) node.getChild(1);
-			handleElse(node, level);
-			traverseChildren(statements, level + 1);
-		}
-		
-	}
-
-	private static void handleIteration(CommonTreeWithLines node, int level)
-	{
-		CommonTreeWithLines keyword = (CommonTreeWithLines) node.getChild(0);
-		
-		String keywordStr = children2String(keyword, false);
-		
-		if(keywordStr.equals("while") || keywordStr.equals("do")){
-			CommonTreeWithLines statements = (CommonTreeWithLines) node.getChild(2);
-			handleIfOrWhile(node, level, keywordStr);		
-			traverseChildren(statements, level + 1);
-		}else if(keywordStr.equals("for")){
-			CommonTreeWithLines statements = (CommonTreeWithLines) node.getChild(5);
-			handleFor(node, level);		
-			traverseChildren(statements, level + 1);
-		}
-		
-	}
-	
-	
+			
 	private static void handleFor(CommonTreeWithLines node, int level)
 	{
 		CommonTreeWithLines keywordToken = (CommonTreeWithLines) node.getChild(0).getChild(0);
@@ -382,11 +418,10 @@ public class CSVExporter {
 		
 		handleArgumentList(argumentList, level + 1);
 		// parse expressions contained in arguments
-		traverseChildren(argumentList, level);
+		
 	}
 	
-	
-	
+		
 	private static void handleArgumentList(CommonTreeWithLines argumentList, int level)
 	{
 		int nChildren = argumentList.getChildCount();
@@ -481,9 +516,9 @@ public class CSVExporter {
 			return false;
 		if(s.equals("CLASS_DEF"))
 			return false;
-		
+				
 		return true;
-	}
+	}  
 
 	private static void traverseChildren(CommonTreeWithLines node, int level)
 	{
