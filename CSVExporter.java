@@ -431,11 +431,16 @@ public class CSVExporter {
 		for(int i = 1; i < nChildren; i+=2){
 			CommonTreeWithLines argument = (CommonTreeWithLines) argumentList.getChild(i);
 			CommonTreeWithLines terminator = (CommonTreeWithLines)argumentList.getChild(i+1);
-			
+			String content;
+					
+
 			String csvLine = "arg" + separator + argument.getLine() + ":" + argument.getCharPositionInLine();
 			csvLine += separator + terminator.getLine() + ":" + terminator.getCharPositionInLine();
 			csvLine += separator + level;
-			csvLine += separator + children2String(argument, false);
+			
+			content = children2String(argument, false);
+			content = content.replaceAll("\n", "_n");
+			csvLine += separator + content;
 			System.out.println(csvLine);
 		
 			traverseChildren(argument, level);
