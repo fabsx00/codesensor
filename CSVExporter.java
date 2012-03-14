@@ -191,6 +191,7 @@ public class CSVExporter {
 		String rowType;
 		if(isOperator(content)) rowType = "op";
 		else rowType = "water";
+		content = content.replaceAll("\n", "_n");
 		outputCSVRow(rowType, startPos, endPos, Integer.toString(level), content);
 	}
 	

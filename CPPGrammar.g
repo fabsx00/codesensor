@@ -164,7 +164,7 @@ for_statement: k='for' '(' for_init_statement condition ';'  expr? ')' statement
 while_statement: k='while' '(' condition ')' statement -> ^(KEYWORD $k) condition ^(STATEMENTS statement?);
 do_statement: k='do' statement 'while' '(' expr ')' -> ^(KEYWORD $k) ^(CONDITION expr) ^(STATEMENTS statement?) ;
 
-condition_: (type_specifier identifier '=' assignment_expr)=> (type_specifier identifier '=' assignment_expr) | expr;
+condition_: expr;
 for_init_statement : (simple_decl) => simple_decl | expr? ';';
 
 label_: (('case'? (ALPHA_NUMERIC | DIGITS | '::')+ ) | access_specifier) ':' ;
@@ -177,7 +177,11 @@ namespace_content_elem: (simple_decl) => simple_decl
   | no_curlies;
   
 type_specifier: cv_qualifier* class_key? ('unsigned' | 'signed')? ALPHA_NUMERIC ('<' template_param_list '>' )? ('::' ALPHA_NUMERIC ('<' template_param_list '>' )?)* ;
-template_param_list : no_angle_brackets* ('<' template_param_list '>' no_angle_brackets*)*;
+template_param_list : template_param_list_elem*;
+template_param_list_elem:  ('<' template_param_list '>')
+         | ('(' template_param_list ')')
+         | no_angle_brackets_or_brackets
+;
 
 // Expressions
 
@@ -215,7 +219,7 @@ assignment_expr_l2_elem: (recognized_expr) => recognized_expr
 no_brackets: ~('(' | ')');
 no_brackets_curlies_or_squares: ~('(' | ')' | '{' | '}' | '[' | ']');
 no_brackets_or_semicolon: ~('(' | ')' | ';');
-no_angle_brackets : ~('<' | '>' );
+no_angle_brackets_or_brackets : ~('<' | '>' | '(' | ')');
 no_curlies: ~('{' | '}');
 no_squares_or_semicolon: ~('[' | ']');
 
