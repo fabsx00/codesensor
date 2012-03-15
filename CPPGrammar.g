@@ -25,34 +25,26 @@ options {
 tokens{
   SOURCE_FILE;
   
-  FUNCTION_DEF;
-  FUNCTION_NAME;
-  RETURN_TYPE;
-  CTOR_LIST;
-  STATEMENTS;
-  INITIALIZER_ID; CTOR_INITIALIZER;
+  FUNCTION_DEF; FUNCTION_NAME; RETURN_TYPE;
+  CTOR_LIST; STATEMENTS; INITIALIZER_ID;
+  CTOR_INITIALIZER;
   
-  INIT_DECL_NAME; PARAMETER_LIST;
-  PARAMETER_DECL; PARAMETER_TYPE; PARAMETER_NAME;
-  CALLEE; ARGUMENT_LIST; ARGUMENT;
-  CALL_TEMPLATE_LIST;
+  INIT_DECL_NAME; PARAMETER_LIST; PARAMETER_DECL;
+  PARAMETER_TYPE; PARAMETER_NAME; CALLEE;
+  ARGUMENT_LIST; ARGUMENT; CALL_TEMPLATE_LIST;
   
-  SIMPLE_DECL;  NAMESPACE_DEF;
-  USING_DIRECTIVE; INCLUDE_DIRECTIVE;
-  TEMPLATE_DECL_SPECIFIER;
+  SIMPLE_DECL;  NAMESPACE_DEF; USING_DIRECTIVE;
+  INCLUDE_DIRECTIVE; TEMPLATE_DECL_SPECIFIER;
   
-  SW;
-  SELECTION; ITERATION; KEYWORD;
-  SWITCH; FOR_INIT; FOR_EXPR;
-  JUMP_STATEMENT; DESTINATION;
-  CONDITION;
-  LABEL;
+  SW; SELECTION; ITERATION;
+  KEYWORD; SWITCH; FOR_INIT;
+  FOR_EXPR; JUMP_STATEMENT; DESTINATION;
+  CONDITION; LABEL;
 
-  CTOR_EXPR; FUNCTION_CALL;
-  CLASS_DEF; CLASS_NAME; TYPE_DEF;
-  BASE_CLASSES; CLASS_CONTENT;
-  TYPE_SPECIFIER; INIT_DECL_LIST;
-  }
+  CTOR_EXPR; FUNCTION_CALL; CLASS_DEF;
+  CLASS_NAME; TYPE_DEF; BASE_CLASSES;
+  CLASS_CONTENT; TYPE_SPECIFIER; INIT_DECL_LIST;
+}
 
 code  : part* -> ^(SOURCE_FILE part*);
 
@@ -72,20 +64,24 @@ include_directive_: '#include' ('"' (ALPHA_NUMERIC | '.')+  '"' | '<' (ALPHA_NUM
 
 // Declarations
 
-simple_decl_:  t='typedef'? template_declaration_start? (  type_specifier init_declarator_list | class_def init_declarator_list? ) c= ';' 
--> ^(TYPE_DEF $t?) ^(TEMPLATE_DECL_SPECIFIER template_declaration_start?)
-  ^(TYPE_SPECIFIER  type_specifier? ) ^(CLASS_DEF class_def?) ^(INIT_DECL_LIST init_declarator_list?) $c;
+simple_decl_:  t='typedef'? template_declaration_start?
+               (  type_specifier init_declarator_list | class_def init_declarator_list? ) c= ';' 
+                -> ^(TYPE_DEF $t?) ^(TEMPLATE_DECL_SPECIFIER template_declaration_start?)
+                    ^(TYPE_SPECIFIER  type_specifier? ) ^(CLASS_DEF class_def?)
+                    ^(INIT_DECL_LIST init_declarator_list?) $c;
 
-template_declaration_start: 'template' '<'template_param_list '>' ;
+template_declaration_start: 'template' '<' template_param_list '>' ;
 
 class_def: class_key class_name base_classes '{' class_content '}';
 class_name: identifier? -> ^(CLASS_NAME identifier?);
 
 class_content: class_content_ -> ^(CLASS_CONTENT class_content_?);
-class_content_: class_content_elem* ('{' class_content_ '}'  class_content_elem*)*;
+class_content_: class_content_elem*;
+
 class_content_elem:  (simple_decl) => simple_decl
   | (function_def) => function_def
   | (label) => label
+  | '{' class_content_ '}'
   | no_curlies
   ;
 
@@ -95,21 +91,24 @@ base_class: 'virtual'? access_specifier? identifier;
 
 init_declarator_list: init_declarator (',' init_declarator)*;
 init_declarator: init_decl_name initializer?;
-init_decl_name_: ( ptr_operator* identifier) ('[' constant_expr? ']')?;
+init_decl_name_: ( ptr_operator* identifier) ('[' constant_expr ']')?;
 initializer: ('(' expr? ')') | '=' assignment_expr;
 
 // Function Definitions
      
-function_def_ :  function_start function_param_list ctor_list? compound_statement -> function_start function_param_list ^(CTOR_LIST ctor_list?) compound_statement;
+function_def_ :  function_start function_param_list ctor_list? compound_statement ->
+                 function_start function_param_list ^(CTOR_LIST ctor_list?) compound_statement;
 
-function_start: template_declaration_start? return_type function_name
--> ^(TEMPLATE_DECL_SPECIFIER template_declaration_start?) return_type function_name;
+function_start: template_declaration_start? return_type function_name ->
+                ^(TEMPLATE_DECL_SPECIFIER template_declaration_start?) return_type function_name;
 
 return_type: return_type_ -> ^(RETURN_TYPE return_type_?);
 return_type_: (function_decl_specifiers* type_specifier)? function_decl_specifiers* ptr_operator*;
 
 function_name_: '(' function_name_ ')' | identifier | operator_function_id;
-function_param_list : o='(' parameter_declaration_clause? c=')' cv_qualifier* exception_specification? -> ^( PARAMETER_LIST $o parameter_declaration_clause? $c);
+function_param_list : o='(' parameter_declaration_clause? c=')' cv_qualifier* exception_specification? ->
+                    ^( PARAMETER_LIST $o parameter_declaration_clause? $c);
+
 exception_specification : 'throw' '(' type_id_list ')';
 
 ctor_list: ':'  ctor_initializer (',' ctor_initializer)* -> ctor_initializer+;
@@ -119,36 +118,51 @@ parameter_declaration_clause: parameter_decl (',' parameter_decl)*;
 parameter_decl_: param_decl_specifiers ptr_operator* parameter_name -> ^(PARAMETER_TYPE param_decl_specifiers ptr_operator*) parameter_name
   | identifier -> ^(SW identifier); // common case: some macro. Also catches void. 
 
-parameter_name_: ('(' parameter_name_ ')' | identifier) ('[' constant_expr? ']')?;
+parameter_name_: ('(' parameter_name_ ')' | identifier) ('[' constant_expr ']')?;
 param_decl_specifiers: ('auto' | 'register')? type_specifier;
 
 // statement
-compound_statement: '{' statement* '}' -> '{' ^(STATEMENTS statement*) '}';
-statement: (compound_statement | non_compound_statement);
 
+statement: compound_statement
+         | non_compound_statement
+;
+
+compound_statement: '{' statement* '}' -> '{' ^(STATEMENTS statement*) '}';
 
 non_compound_statement:  (non_expr_statement) => non_expr_statement
     | (expr_statement) => expr_statement
     | statement_water
-  ;
+;
 
-non_expr_statement: selection_statement | iteration_statement | jump_statement
-  | try_block | catch_block
-  | simple_decl | label;
+non_expr_statement: selection_statement | iteration_statement
+    | jump_statement | try_block | catch_block | simple_decl | label
+;
 
 
-statement_water: no_curlies;
+statement_water: no_curlies ->^(SW no_curlies);
 
-expr_statement: expr_statement_elem+ ('{' expr_statement_l2 '}' expr_statement_elem*)* ';';
-expr_statement_l2: expr_statement_elem* ('{' expr_statement_l2 '}' expr_statement_elem*)* ;
+expr_statement: expr_statement_start expr_statement_elem* ';';
+
+expr_statement_start: (recognized_expr) => recognized_expr
+    | expr_statement_water;
 
 expr_statement_elem:  (recognized_expr) => recognized_expr
-  |  expr_statement_water;
+    | '{' expr_statement_l2 '}'                   
+    | expr_statement_water;
+
+
+expr_statement_l2: expr_statement_l2_elem*;
+
+expr_statement_l2_elem: (recognized_expr) => recognized_expr
+|'{' expr_statement_l2 '}'
+| expr_statement_l2_water
+;                   
 
 expr_statement_water: expr_statement_water_ ->^(SW expr_statement_water_);
+expr_statement_l2_water: expr_statement_l2_water_ ->^(SW expr_statement_l2_water_);
+
 expr_statement_water_: ~('{' | '}' | ';');
-
-
+expr_statement_l2_water_: no_curlies;
 
 selection_statement: selection_statement_ -> ^(SELECTION selection_statement_);
 selection_statement_: if_statement | else_statement | switch_statement;
@@ -200,7 +214,8 @@ expr_elem:  (recognized_expr) => recognized_expr
                 | no_brackets_or_semicolon;
 
 recognized_expr: function_call;
-function_call_:  called_function call_template_list function_argument_list -> called_function ^(CALL_TEMPLATE_LIST call_template_list?)  function_argument_list;
+function_call_:  called_function call_template_list function_argument_list
+              -> called_function ^(CALL_TEMPLATE_LIST call_template_list?) function_argument_list;
 call_template_list: ('<' template_param_list '>' )?;
 function_argument_list: function_argument_list_ -> ^(ARGUMENT_LIST function_argument_list_?);
 function_argument_list_: '(' ( function_argument (',' function_argument)* )? ')';
@@ -209,12 +224,17 @@ called_function: called_function_ -> ^(CALLEE called_function_);
 called_function_:  ( '(' expr ')' )=> '(' expr ')' | b_ident;
 b_ident:  ptr_operator* ('('  b_ident+ ')'  | identifier) (('.' | '->') b_ident)?;
 
-constant_expr: no_squares_or_semicolon+ ('[' constant_expr? ']'  no_squares_or_semicolon*)*;
+constant_expr: constant_expr_elem*;
+
+constant_expr_elem: '[' constant_expr ']'
+                    | no_squares_or_semicolon;
 
 assignment_expr: assignment_expr_elem+;
 
 assignment_expr_elem: (recognized_expr) => recognized_expr
-   | ( '(' assignment_expr_l2 ')' | ('{' assignment_expr_l2 '}') | ('[' assignment_expr_l2 ']'))
+   | ( '(' assignment_expr_l2 ')'
+   | ('{' assignment_expr_l2 '}')
+   | ('[' assignment_expr_l2 ']'))
    | ~(',' | ';' | '(' | ')' | '{' | '}' | '[' | ']');
     
 assignment_expr_l2: assignment_expr_l2_elem*;
@@ -230,7 +250,7 @@ no_brackets_curlies_or_squares: ~('(' | ')' | '{' | '}' | '[' | ']');
 no_brackets_or_semicolon: ~('(' | ')' | ';');
 no_angle_brackets_or_brackets : ~('<' | '>' | '(' | ')');
 no_curlies: ~('{' | '}');
-no_squares_or_semicolon: ~('[' | ']');
+no_squares_or_semicolon: ~('[' | ']' | ';');
 
 // keywords & operators
 
