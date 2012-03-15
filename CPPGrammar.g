@@ -124,15 +124,20 @@ param_decl_specifiers: ('auto' | 'register')? type_specifier;
 
 // statement
 compound_statement: '{' statement* '}' -> '{' ^(STATEMENTS statement*) '}';
-statement: (compound_statement | non_compound_statement | ';');
+statement: (compound_statement | non_compound_statement);
+
 
 non_compound_statement:  (non_expr_statement) => non_expr_statement
-  | expr_statement;
+    | (expr_statement) => expr_statement
+    | statement_water
+  ;
 
 non_expr_statement: selection_statement | iteration_statement | jump_statement
   | try_block | catch_block
   | simple_decl | label;
 
+
+statement_water: no_curlies;
 
 expr_statement: expr_statement_elem+ ('{' expr_statement_l2 '}' expr_statement_elem*)* ';';
 expr_statement_l2: expr_statement_elem* ('{' expr_statement_l2 '}' expr_statement_elem*)* ;
@@ -142,6 +147,8 @@ expr_statement_elem:  (recognized_expr) => recognized_expr
 
 expr_statement_water: expr_statement_water_ ->^(SW expr_statement_water_);
 expr_statement_water_: ~('{' | '}' | ';');
+
+
 
 selection_statement: selection_statement_ -> ^(SELECTION selection_statement_);
 selection_statement_: if_statement | else_statement | switch_statement;
@@ -161,7 +168,8 @@ if_statement: k='if' '(' condition ')'  statement -> ^(KEYWORD $k) condition ^(S
 else_statement: k='else' statement -> ^(KEYWORD $k) ^(STATEMENTS statement?);
 switch_statement: k='switch' '(' condition ')' statement -> ^(KEYWORD $k ) condition ^(STATEMENTS statement?);
 
-for_statement: k='for' '(' for_init_statement condition? ';'  expr? ')' statement -> ^(KEYWORD $k) ^(FOR_INIT for_init_statement?) condition ';' ^(FOR_EXPR expr?) ^(STATEMENTS statement?);
+for_statement: k='for' '(' for_init_statement condition ';'  expr? ')' statement
+            -> ^(KEYWORD $k) ^(FOR_INIT for_init_statement?) condition ';' ^(FOR_EXPR expr?) ^(STATEMENTS statement?);
 while_statement: k='while' '(' condition ')' statement -> ^(KEYWORD $k) condition ^(STATEMENTS statement?);
 do_statement: k='do' statement 'while' '(' expr ')' -> ^(KEYWORD $k) ^(CONDITION expr) ^(STATEMENTS statement?) ;
 
@@ -256,7 +264,7 @@ namespace_def: namespace_def_ -> ^(NAMESPACE_DEF namespace_def_);
 using_directive: using_directive_ -> ^(USING_DIRECTIVE using_directive_);
 simple_decl: simple_decl_ -> ^(SIMPLE_DECL simple_decl_);
 jump_statement: jump_statement_ -> ^(JUMP_STATEMENT jump_statement_);
-condition: condition_ -> ^(CONDITION condition_);
+condition: condition_? -> ^(CONDITION condition_?);
 
 init_decl_name: init_decl_name_ -> ^(INIT_DECL_NAME init_decl_name_);
 

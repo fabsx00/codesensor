@@ -464,7 +464,7 @@ public class CSVExporter {
 	
 	private static CommonTreeWithLines getTerminatorNode(CommonTreeWithLines node)
 	{
-		if(isLeaf(node)) return null;
+		if(isLeaf(node)) return node;
 		
 		CommonTreeWithLines lastChild = (CommonTreeWithLines)node.getChild(node.getChildCount() - 1);
 		String lastChildText = lastChild.toString();
