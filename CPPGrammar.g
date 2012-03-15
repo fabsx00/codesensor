@@ -134,7 +134,8 @@ non_expr_statement: selection_statement | iteration_statement | jump_statement
   | simple_decl | label;
 
 
-expr_statement: expr_statement_elem+ ('{' expr_statement_elem* '}' expr_statement_elem*)* ';';
+expr_statement: expr_statement_elem+ ('{' expr_statement_l2 '}' expr_statement_elem*)* ';';
+expr_statement_l2: expr_statement_elem* ('{' expr_statement_l2 '}' expr_statement_elem*)* ;
 
 expr_statement_elem:  (recognized_expr) => recognized_expr
   |  expr_statement_water;
