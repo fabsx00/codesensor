@@ -161,7 +161,7 @@ if_statement: k='if' '(' condition ')'  statement -> ^(KEYWORD $k) condition ^(S
 else_statement: k='else' statement -> ^(KEYWORD $k) ^(STATEMENTS statement?);
 switch_statement: k='switch' '(' condition ')' statement -> ^(KEYWORD $k ) condition ^(STATEMENTS statement?);
 
-for_statement: k='for' '(' for_init_statement condition ';'  expr? ')' statement -> ^(KEYWORD $k) ^(FOR_INIT for_init_statement?) condition ';' ^(FOR_EXPR expr?) ^(STATEMENTS statement?);
+for_statement: k='for' '(' for_init_statement condition? ';'  expr? ')' statement -> ^(KEYWORD $k) ^(FOR_INIT for_init_statement?) condition ';' ^(FOR_EXPR expr?) ^(STATEMENTS statement?);
 while_statement: k='while' '(' condition ')' statement -> ^(KEYWORD $k) condition ^(STATEMENTS statement?);
 do_statement: k='do' statement 'while' '(' expr ')' -> ^(KEYWORD $k) ^(CONDITION expr) ^(STATEMENTS statement?) ;
 
