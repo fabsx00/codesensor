@@ -229,7 +229,7 @@ public class CSVExporter {
 				if(isLeaf(declName))
 					outputLeafNode(declName, level);
 				else				
-				    traverseChildren(declName, level);
+				    traverseChildren(declName, level + 1);
 				
 				continue;
 			}
@@ -349,9 +349,9 @@ public class CSVExporter {
 		csvLine +=  ")";
 		System.out.println(csvLine);
 	
-		traverseChildren(forInitStatement, level);
-		traverseChildren(condition, level);
-		traverseChildren(expr, level);
+		traverseChildren(forInitStatement, level + 1);
+		traverseChildren(condition, level + 1);
+		traverseChildren(expr, level + 1);
 		
 	
 	}
@@ -369,7 +369,7 @@ public class CSVExporter {
 		csvLine += separator + "(" + children2String(condition, true) + ")";
 		System.out.println(csvLine);
 	
-		traverseChildren(condition, level);
+		traverseChildren(condition, level + 1);
 	}
 	
 	private static void handleElse(CommonTreeWithLines node, int level)
@@ -398,7 +398,7 @@ public class CSVExporter {
 		csvLine += separator + children2String(destination, false);
 		System.out.println(csvLine);
 		
-		traverseChildren(destination, level);
+		traverseChildren(destination, level + 1);
 	}
 
 	private static void handleFunctionCall(CommonTreeWithLines node, int level)
@@ -443,7 +443,7 @@ public class CSVExporter {
 			csvLine += separator + content;
 			System.out.println(csvLine);
 		
-			traverseChildren(argument, level);
+			traverseChildren(argument, level + 1);
 		}
 	}
 
