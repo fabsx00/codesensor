@@ -229,11 +229,12 @@ public class CSVExporter {
 				if(isLeaf(declName))
 					outputLeafNode(declName, level);
 				else				
-				    traverseChildren(declName, level + 1);
-				
+				    // traverseChildren(declName, level + 1);
+				    traverse(declName, level + 1);
+
 				continue;
-			}
-			
+			}			
+
 			String declNameStr = children2String(declName, false);			
 			String startPos = startNode.getLine() + ":" + startNode.getCharPositionInLine();
 			String endPos = terminatorNode.getLine() + ":" + terminatorNode.getCharPositionInLine();
