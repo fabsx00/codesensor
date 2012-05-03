@@ -139,12 +139,15 @@ public class CSVExporter {
 			handleIfOrWhile(node, level, keywordStr);		
 			outputPseudoNode("stmts", statements, "", level + 1);
 			
-		}else if(keywordStr.equals("else")){
-			CommonTreeWithLines statements = (CommonTreeWithLines) node.getChild(1);
-			handleElse(node, level);
-			outputPseudoNode("stmts", statements, "", level + 1);			
-		}
-		
+			
+			if(keywordStr.equals("if")){			    			    
+			    CommonTreeWithLines elseNode = (CommonTreeWithLines) node.getChild(3);
+			    if(elseNode.getChildCount() == 0) return;
+			    CommonTreeWithLines elseStatements = (CommonTreeWithLines) elseNode.getChild(1);
+			    handleElse(elseNode, level + 1);
+			    outputPseudoNode("stmts", elseStatements, "", level + 2);		    
+			}
+		}				
 	}
 
 	private static void handleIteration(CommonTreeWithLines node, int level)
@@ -375,8 +378,19 @@ public class CSVExporter {
 		CommonTreeWithLines keywordToken = (CommonTreeWithLines) node.getChild(0).getChild(0);
 		CommonTreeWithLines condition = (CommonTreeWithLines) node.getChild(1);
 		CommonTreeWithLines statements = (CommonTreeWithLines) node.getChild(2); 
-		CommonTreeWithLines terminator = getTerminatorNode(statements);
-		
+		CommonTreeWithLines elseNode = null;
+		CommonTreeWithLines terminator;
+				
+		if(keywordStr.equals("if")){
+		    elseNode = (CommonTreeWithLines) node.getChild(3);
+		    if(elseNode.getChildCount() > 0){			
+			CommonTreeWithLines elseStatements = (CommonTreeWithLines) elseNode.getChild(1);
+			terminator = getTerminatorNode(elseStatements);		
+		    }else
+			terminator = getTerminatorNode(statements);
+		}else{
+		    terminator = getTerminatorNode(statements);
+		}
 		String conditionStr = children2String(condition, true);
 		
 		String csvLine = "";
@@ -386,8 +400,7 @@ public class CSVExporter {
 		csvLine += separator + "(" + conditionStr + ")";
 		System.out.println(csvLine);
 		
-		outputPseudoNode("cond", condition, conditionStr, level + 1);
-		
+		outputPseudoNode("cond", condition, conditionStr, level + 1);		
 	}
 	
 	private static void outputPseudoNode(String type, CommonTreeWithLines condition, String conditionStr, int level)

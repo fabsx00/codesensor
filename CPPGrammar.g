@@ -39,7 +39,7 @@ tokens{
   SW; SELECTION; ITERATION;
   KEYWORD; SWITCH; FOR_INIT;
   FOR_EXPR; JUMP_STATEMENT; DESTINATION;
-  CONDITION; LABEL;
+  CONDITION; LABEL; ELSE;
 
   CTOR_EXPR; FUNCTION_CALL; CLASS_DEF;
   CLASS_NAME; TYPE_DEF; BASE_CLASSES;
@@ -165,7 +165,7 @@ expr_statement_water_: ~('{' | '}' | ';');
 expr_statement_l2_water_: no_curlies;
 
 selection_statement: selection_statement_ -> ^(SELECTION selection_statement_);
-selection_statement_: if_statement | else_statement | switch_statement;
+selection_statement_: if_statement | switch_statement;
 
 iteration_statement: iteration_statement_ -> ^(ITERATION iteration_statement_);
 iteration_statement_: for_statement | while_statement | do_statement;
@@ -178,7 +178,7 @@ goto_statement:  k='goto' ( d=ALPHA_NUMERIC|  d=DIGITS) -> ^(KEYWORD $k) ^(DESTI
 try_block: 'try' compound_statement;
 catch_block: 'catch' '('param_decl_specifiers parameter_name? ')' compound_statement;
 
-if_statement: k='if' '(' condition ')'  statement -> ^(KEYWORD $k) condition ^(STATEMENTS statement?) ;
+if_statement: k='if' '(' condition ')'  statement else_statement? -> ^(KEYWORD $k) condition ^(STATEMENTS statement?) ^(ELSE else_statement?);
 else_statement: k='else' statement -> ^(KEYWORD $k) ^(STATEMENTS statement?);
 switch_statement: k='switch' '(' condition ')' statement -> ^(KEYWORD $k ) condition ^(STATEMENTS statement?);
 
