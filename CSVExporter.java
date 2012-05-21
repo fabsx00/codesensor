@@ -459,7 +459,7 @@ public class CSVExporter {
 		csvLine += separator + terminator.getLine() + ":" + terminator.getCharPositionInLine();
 		csvLine += separator + level;
 		csvLine += separator + calleeStr;
-		// csvLine += separator + "(" + children2String(argumentList, false) + ")";
+		csvLine += separator + children2String(argumentList, false);
 		System.out.println(csvLine);
 		
 		handleArgumentList(argumentList, level + 1);
