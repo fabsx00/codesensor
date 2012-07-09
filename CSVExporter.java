@@ -141,8 +141,8 @@ public class CSVExporter {
 			
 		}else if(keywordStr.equals("else")){
 			CommonTreeWithLines statements = (CommonTreeWithLines) node.getChild(1);
-			handleElse(node, level);
-			outputPseudoNode("stmts", statements, "", level + 1);			
+			handleElse(node, level + 1);
+			outputPseudoNode("stmts", statements, "", level + 2);			
 		}
 		
 	}
