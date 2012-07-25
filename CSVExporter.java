@@ -305,7 +305,7 @@ public class CSVExporter {
 		
 		outputCSVRow("func", startPos, endPos, Integer.toString(level), content);
 		handleParameterList(parameterList, level + 1);
-		outputPseudoNode("stmnts", functionContent, "", level + 1);		
+		outputPseudoNode("stmts", functionContent, "", level + 1);		
 	}
 	
 	
@@ -446,7 +446,7 @@ public class CSVExporter {
 		csvLine += separator + terminator.getLine() + ":" + terminator.getCharPositionInLine();
 		csvLine += separator + level;
 		csvLine += separator + calleeStr;
-		// csvLine += separator + "(" + children2String(argumentList, false) + ")";
+		csvLine += separator + "(" + children2String(argumentList, false) + ")";
 		System.out.println(csvLine);
 		
 		handleArgumentList(argumentList, level + 1);
