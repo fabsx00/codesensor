@@ -422,12 +422,15 @@ public class CSVExporter {
 		String keywordStr = children2String(keywordToken, false);
 		CommonTreeWithLines destination = (CommonTreeWithLines) node.getChild(1);
 		CommonTreeWithLines terminator = (CommonTreeWithLines) node.getChild(2);
-		
+		String content = children2String(destination, false);
+		content = content.replaceAll("\n", "_n");
+
 		String csvLine = "";
 		csvLine += keywordStr + separator +  keywordToken.getLine() + ":" + keywordToken.getCharPositionInLine();
 		csvLine += separator + terminator.getLine() + ":" + terminator.getCharPositionInLine();
 		csvLine += separator + level;
-		csvLine += separator + children2String(destination, false);
+		
+		csvLine += separator + content;
 		System.out.println(csvLine);
 		
 		traverseChildren(destination, level + 1);
