@@ -227,7 +227,7 @@ public class CSVExporter {
 			if(declName.getType() != CPPGrammarParser.INIT_DECL_NAME){
 				
 				if(isLeaf(declName))
-					outputLeafNode(declName, level);
+					outputLeafNode(declName, level + 1);
 				else				
 				    // traverseChildren(declName, level + 1);
 				    traverse(declName, level + 1);
