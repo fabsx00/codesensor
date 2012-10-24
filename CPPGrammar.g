@@ -213,9 +213,9 @@ template_param_list_elem:  ('<' template_param_list '>')
 expr:  and_expression;
 
 and_expression : and_expression_ -> ^(AND and_expression_);	
-and_expression_ : or_expression ('&&' or_expression)*;
+and_expression_ : or_expression ('&&'! or_expression)*;
 or_expression : or_expression_ -> ^(OR or_expression_);	
-or_expression_ : expr_elem ('||' expr_elem)*;
+or_expression_ : expr_elem ('||'! expr_elem)*;
 
 expr_elem : expr_elem_+ -> ^(EXPR_ELEM expr_elem_+);	
 expr_elem_:  (recognized_expr) => recognized_expr
