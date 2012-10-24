@@ -44,6 +44,8 @@ tokens{
   CTOR_EXPR; FUNCTION_CALL; CLASS_DEF;
   CLASS_NAME; TYPE_DEF; BASE_CLASSES;
   CLASS_CONTENT; TYPE_SPECIFIER; INIT_DECL_LIST;
+
+  BRACKETS; CURLIES; SQUARES; AND; OR; EXPR_ELEM;
 }
 
 code  : part* -> ^(SOURCE_FILE part*);
@@ -208,10 +210,19 @@ template_param_list_elem:  ('<' template_param_list '>')
 
 // Expressions
 
-expr:  expr_elem+;
-expr_elem:  (recognized_expr) => recognized_expr
-                | '(' expr ')'
-                | no_brackets_or_semicolon;
+expr:  and_expression;
+
+and_expression : and_expression_ -> ^(AND and_expression_);	
+and_expression_ : or_expression ('&&' or_expression)*;
+or_expression : or_expression_ -> ^(OR or_expression_);	
+or_expression_ : expr_elem ('||' expr_elem)*;
+
+expr_elem : expr_elem_+ -> ^(EXPR_ELEM expr_elem_+);	
+expr_elem_:  (recognized_expr) => recognized_expr
+                | '(' expr ')' -> ^(BRACKETS expr)
+                | '[' expr ']' -> ^(SQUARES expr)
+                | '{' expr '}' -> ^(CURLIES)
+                | no_nesting_semicolon_logical_infix;
 
 recognized_expr: function_call;
 function_call_:  called_function call_template_list function_argument_list
@@ -247,14 +258,17 @@ assignment_expr_l2_elem: (recognized_expr) => recognized_expr
 
 no_brackets: ~('(' | ')');
 no_brackets_curlies_or_squares: ~('(' | ')' | '{' | '}' | '[' | ']');
+no_nesting_semicolon_logical_infix: ~('(' | ')' | '{' | '}' | '[' | ']' | ';' | '&&' | '||'); 
 no_brackets_or_semicolon: ~('(' | ')' | ';');
 no_angle_brackets_or_brackets : ~('<' | '>' | '(' | ')');
 no_curlies: ~('{' | '}');
 no_squares_or_semicolon: ~('[' | ']' | ';');
 
+
 // keywords & operators
 
 cv_qualifier :  'const' | 'volatile';
+condition: condition_? -> ^(CONDITION condition_?);
 function_decl_specifiers: ('inline' | 'virtual' | 'explicit' | 'friend' | 'static');
 class_key: ('struct' | 'class' | 'union' | 'enum');
 ptr_operator: ('*' | '&');
@@ -284,7 +298,6 @@ namespace_def: namespace_def_ -> ^(NAMESPACE_DEF namespace_def_);
 using_directive: using_directive_ -> ^(USING_DIRECTIVE using_directive_);
 simple_decl: simple_decl_ -> ^(SIMPLE_DECL simple_decl_);
 jump_statement: jump_statement_ -> ^(JUMP_STATEMENT jump_statement_);
-condition: condition_? -> ^(CONDITION condition_?);
 
 init_decl_name: init_decl_name_ -> ^(INIT_DECL_NAME init_decl_name_);
 
