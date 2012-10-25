@@ -437,7 +437,7 @@ public class CSVExporter {
 	    if(numberOfChildren > 1){
 		level++;
 		String csvLine = "";			
-		csvLine += "atom" + separator +  node.getLine() + ":" + node.getCharPositionInLine();
+		csvLine += "elem" + separator +  node.getLine() + ":" + node.getCharPositionInLine();
 		csvLine += separator + terminator.getLine() + ":" + terminator.getCharPositionInLine();
 		csvLine += separator + level;
 		csvLine += separator + exprElemString;
