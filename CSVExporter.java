@@ -385,9 +385,10 @@ public class CSVExporter {
 	    CommonTreeWithLines terminator = getTerminatorNode(node);
 	    String andString = TreeToStringConverter.buildAndString(node);
 	    String keyword = "and";
-			
+	    int numberOfChildren = node.getChildCount();
+		
 
-	    if(numberOfSiblings > 1){
+	    if(numberOfChildren > 1){
 		level++;
 		String csvLine = "";			
 		csvLine += keyword + separator +  node.getLine() + ":" + node.getCharPositionInLine();
@@ -397,7 +398,7 @@ public class CSVExporter {
 		System.out.println(csvLine);				
 	    }
 			
-	    int numberOfChildren = node.getChildCount();
+	    
 	    for(int i = 0; i < node.getChildCount(); i++){
 		CommonTreeWithLines orNode = (CommonTreeWithLines) node.getChild(i);
 		handleOrNode(orNode, level, numberOfChildren);
@@ -408,18 +409,18 @@ public class CSVExporter {
 	{
 	    CommonTreeWithLines terminator = getTerminatorNode(node);
 	    String orString = TreeToStringConverter.buildOrString(node);
-			
-	    if(numberOfSiblings > 1){
+	    int numberOfChildren = node.getChildCount();
+		
+	    if(numberOfChildren > 1){
 		level++;
 		String csvLine = "";			
-		csvLine += "and" + separator +  node.getLine() + ":" + node.getCharPositionInLine();
+		csvLine += "or" + separator +  node.getLine() + ":" + node.getCharPositionInLine();
 		csvLine += separator + terminator.getLine() + ":" + terminator.getCharPositionInLine();
 		csvLine += separator + level;
 		csvLine += separator + orString;
 		System.out.println(csvLine);
 	    }
-			
-	    int numberOfChildren = node.getChildCount();
+				    
 	    for(int i = 0; i < numberOfChildren; i++){
 		CommonTreeWithLines exprElemNode = (CommonTreeWithLines) node.getChild(i);
 		handleExprElemNode(exprElemNode, level, numberOfChildren);
@@ -431,19 +432,20 @@ public class CSVExporter {
 	{
 	    CommonTreeWithLines terminator = getTerminatorNode(node);
 	    String exprElemString = TreeToStringConverter.buildExprElemString(node);
-			
-	    if(numberOfSiblings > 1){
+	    int numberOfChildren = node.getChildCount();
+	    
+	    if(numberOfChildren > 1){
 		level++;
 		String csvLine = "";			
-		csvLine += "or" + separator +  node.getLine() + ":" + node.getCharPositionInLine();
+		csvLine += "atom" + separator +  node.getLine() + ":" + node.getCharPositionInLine();
 		csvLine += separator + terminator.getLine() + ":" + terminator.getCharPositionInLine();
 		csvLine += separator + level;
 		csvLine += separator + exprElemString;
 		System.out.println(csvLine);
 	    }
 
-
-	    for(int i = 0; i < node.getChildCount(); i++){
+	    
+	    for(int i = 0; i < numberOfChildren; i++){
 		CommonTreeWithLines exprElemNode = (CommonTreeWithLines) node.getChild(i);
 		handleExprElemChildNode(exprElemNode, level + 1);
 	    }			
