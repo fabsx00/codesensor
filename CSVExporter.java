@@ -434,7 +434,7 @@ public class CSVExporter {
 	    String exprElemString = TreeToStringConverter.buildExprElemString(node);
 	    int numberOfChildren = node.getChildCount();
 	    
-	    // if(numberOfChildren > 1){
+	    if(numberOfChildren > 1){
 		level++;
 		String csvLine = "";			
 		csvLine += "expr" + separator +  node.getLine() + ":" + node.getCharPositionInLine();
@@ -442,7 +442,7 @@ public class CSVExporter {
 		csvLine += separator + level;
 		csvLine += separator + exprElemString;
 		System.out.println(csvLine);
-		// }
+	    }
 
 	    
 	    for(int i = 0; i < numberOfChildren; i++){
@@ -560,7 +560,7 @@ public class CSVExporter {
 	    csvLine += separator + terminator.getLine() + ":" + terminator.getCharPositionInLine();
 	    csvLine += separator + level;
 	    csvLine += separator + calleeStr;
-	    // csvLine += separator + "(" + TreeToStringConverter.leaves2String(argumentList, false) + ")";
+	    csvLine += separator + "(" + TreeToStringConverter.leaves2String(argumentList, false) + ")";
 	    System.out.println(csvLine);
 		
 	    handleArgumentList(argumentList, level + 1);
