@@ -458,11 +458,17 @@ public class CSVExporter {
 	    String exprElemChildString = TreeToStringConverter.buildExprElemChildString(node);
 			
 	    switch(node.getType())
-		{
+		{   
 		case CPPGrammarParser.BRACKETS:				
-		case CPPGrammarParser.CURLIES:			
-		case CPPGrammarParser.SQUARES:
 		    outputPseudoNode("bracks", node, exprElemChildString, level);
+		    handleAndNode( (CommonTreeWithLines) node.getChild(0), level, node.getChildCount());
+		    return;
+		case CPPGrammarParser.CURLIES:			
+		    outputPseudoNode("cbracks", node, exprElemChildString, level);
+		    handleAndNode( (CommonTreeWithLines) node.getChild(0), level, node.getChildCount());
+		    return;
+		case CPPGrammarParser.SQUARES:
+		    outputPseudoNode("sbracks", node, exprElemChildString, level);
 		    handleAndNode( (CommonTreeWithLines) node.getChild(0), level, node.getChildCount());
 		    return;
 		case CPPGrammarParser.FUNCTION_CALL:
