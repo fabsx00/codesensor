@@ -434,15 +434,15 @@ public class CSVExporter {
 	    String exprElemString = TreeToStringConverter.buildExprElemString(node);
 	    int numberOfChildren = node.getChildCount();
 	    
-	    if(numberOfChildren > 1){
+	    // if(numberOfChildren > 1){
 		level++;
 		String csvLine = "";			
-		csvLine += "elem" + separator +  node.getLine() + ":" + node.getCharPositionInLine();
+		csvLine += "expr" + separator +  node.getLine() + ":" + node.getCharPositionInLine();
 		csvLine += separator + terminator.getLine() + ":" + terminator.getCharPositionInLine();
 		csvLine += separator + level;
 		csvLine += separator + exprElemString;
 		System.out.println(csvLine);
-	    }
+		// }
 
 	    
 	    for(int i = 0; i < numberOfChildren; i++){
