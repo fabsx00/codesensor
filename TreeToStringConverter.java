@@ -10,6 +10,8 @@ class TreeToStringConverter
     public static String buildAndString(CommonTreeWithLines node)
     {
 	String retval = "";
+	if(node == null) return "";
+	
 	for(int i = 0; i < node.getChildCount(); i++)
 	    {
 		if(i > 0) retval += " && ";
