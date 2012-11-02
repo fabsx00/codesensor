@@ -552,7 +552,7 @@ public class CSVExporter {
     
     private static void handleExprStatement(CommonTreeWithLines node, int level)
 	{	    
-	    outputPseudoNode("expr_stmt", node, "", level);	    
+	    outputPseudoNode("stmt", node, "", level);	    
 	    traverseChildren(node, level + 1);
 	}
     
