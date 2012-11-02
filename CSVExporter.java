@@ -98,6 +98,9 @@ public class CSVExporter {
 	    case CPPGrammarParser.JUMP_STATEMENT:
 		handleJump(node, level);
 		break;
+	    case CPPGrammarParser.EXPR_STATEMENT:
+		handleExprStatement(node, level);
+		break;
 	    case CPPGrammarParser.FUNCTION_CALL:
 		handleFunctionCall(node, level);
 		break;
@@ -270,7 +273,6 @@ public class CSVExporter {
 	String content = className;
 
 	outputCSVRow(classKey, startPos, endPos, Integer.toString(level), content);
-		
 	traverseChildren(classContentNode, level + 1);
 	return className;
     }
@@ -546,6 +548,14 @@ public class CSVExporter {
 		
 	    traverseChildren(destination, level + 1);
 	}
+
+    
+    private static void handleExprStatement(CommonTreeWithLines node, int level)
+	{	    
+	    outputPseudoNode("expr_stmt", node, "", level);	    
+	    traverseChildren(node, level + 1);
+	}
+    
 
     private static void handleFunctionCall(CommonTreeWithLines node, int level)
 	{

@@ -39,7 +39,7 @@ tokens{
   SW; SELECTION; ITERATION;
   KEYWORD; SWITCH; FOR_INIT;
   FOR_EXPR; JUMP_STATEMENT; DESTINATION;
-  CONDITION; LABEL;
+  CONDITION; LABEL; EXPR_STATEMENT;
 
   CTOR_EXPR; FUNCTION_CALL; CLASS_DEF;
   CLASS_NAME; TYPE_DEF; BASE_CLASSES;
@@ -143,7 +143,8 @@ non_expr_statement: selection_statement | iteration_statement
 
 statement_water: no_curlies ->^(SW no_curlies);
 
-expr_statement: expr_statement_start expr_statement_elem* ';';
+expr_statement: expr_statement_ -> ^(EXPR_STATEMENT expr_statement_);
+expr_statement_: expr_statement_start expr_statement_elem* ';';
 
 expr_statement_start: (recognized_expr) => recognized_expr
     | expr_statement_water;
