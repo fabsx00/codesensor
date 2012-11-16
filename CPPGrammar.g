@@ -222,7 +222,7 @@ expr_elem : expr_elem_+ -> ^(EXPR_ELEM expr_elem_+);
 expr_elem_:  (recognized_expr) => recognized_expr
                 | '(' expr ')' -> ^(BRACKETS expr)
                 | '[' expr ']' -> ^(SQUARES expr)
-                | '{' expr '}' -> ^(CURLIES)
+                | '{' expr '}' -> ^(CURLIES expr)
                 | no_nesting_semicolon_logical_infix;
 
 recognized_expr: function_call;
