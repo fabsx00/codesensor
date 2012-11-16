@@ -372,14 +372,25 @@ public class CSVExporter {
     private static void handleCondition(CommonTreeWithLines node, int level, String nodeStr)
 	{
 	    outputPseudoNode("cond", node, nodeStr, level);
-	    int numberOfChildren = node.getChildCount();
-	    for(int i = 0; i < numberOfChildren; i++){
-		CommonTreeWithLines andNode = (CommonTreeWithLines) node.getChild(i);
-		handleOrNode(andNode, level, numberOfChildren);
-	    }		
-			
+	    CommonTreeWithLines child = (CommonTreeWithLines) node.getChild(0);
+	    handleConditionalExpr(child, level);	    
 	}
 	
+    private static void handleConditionalExpr(CommonTreeWithLines node, int level)
+    {
+	int numberOfChildren = node.getChildCount();
+	
+	CommonTreeWithLines orNode = (CommonTreeWithLines) node.getChild(0);
+	handleOrNode(orNode, level, numberOfChildren);
+	if(numberOfChildren > 1){
+	    CommonTreeWithLines condNode = (CommonTreeWithLines) node.getChild(2);
+	    CommonTreeWithLines suffixNode = (CommonTreeWithLines) node.getChild(4);
+	    String conditionStr = TreeToStringConverter.buildConditionString(condNode);
+	    handleCondition(condNode, level + 1, conditionStr);
+	    handleConditionalExpr(suffixNode, level);
+	}
+	
+    }
 
     private static void handleAndNode(CommonTreeWithLines node, int level, int numberOfSiblings)
 	{	    			

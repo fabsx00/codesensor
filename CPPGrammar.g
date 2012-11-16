@@ -46,6 +46,7 @@ tokens{
   CLASS_CONTENT; TYPE_SPECIFIER; INIT_DECL_LIST;
 
   BRACKETS; CURLIES; SQUARES; AND; OR; EXPR_ELEM;
+  COND_EXPR;
 }
 
 code  : part* -> ^(SOURCE_FILE part*);
@@ -211,7 +212,10 @@ template_param_list_elem:  ('<' template_param_list '>')
 
 // Expressions
 
-expr:  or_expression;
+expr:  conditional_expression;
+conditional_expression: conditional_expression_ -> ^(COND_EXPR conditional_expression_);
+
+conditional_expression_: or_expression ('?' condition ':' conditional_expression)?;
 
 or_expression : or_expression_ -> ^(OR or_expression_);	
 or_expression_ : and_expression ('||'! and_expression)*;
@@ -312,6 +316,7 @@ function_call: function_call_ -> ^(FUNCTION_CALL function_call_);
 // Lexer: 
 // List valid characters not yet used in rules
 DOT: '.'; SIZEOF: 'sizeof'; 
+QMARK: '?'; COLON: ':';
 
 ALPHA_NUMERIC : ('a' .. 'z'| 'A' .. 'Z' | '_' | '~')('a' .. 'z'| 'A' .. 'Z' | '_' | '0' .. '9')*;
 DIGITS  : ('0' .. '9')+;

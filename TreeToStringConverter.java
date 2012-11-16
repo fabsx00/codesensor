@@ -3,10 +3,37 @@ class TreeToStringConverter
 {
     public static String buildConditionString(CommonTreeWithLines condition)
     {
-	CommonTreeWithLines andNode = (CommonTreeWithLines) condition.getChild(0);		
-	return buildOrString(andNode);			
+	CommonTreeWithLines childNode = (CommonTreeWithLines) condition.getChild(0);		
+	return buildConditionalExprString(childNode);
     }
     
+    public static String buildConditionalExprString(CommonTreeWithLines condition)
+    {
+	CommonTreeWithLines orNode = (CommonTreeWithLines) condition.getChild(0);		
+	String retval = buildOrString(orNode);
+	if(condition.getChildCount() > 1){
+	    CommonTreeWithLines condNode = (CommonTreeWithLines) condition.getChild(2);
+	    CommonTreeWithLines suffixNode = (CommonTreeWithLines) condition.getChild(4);
+	    retval += '?';
+	    retval += buildConditionString(condNode);
+	    retval += ':';
+	    retval += buildConditionalExprString(suffixNode);
+	}
+	return retval;
+    }
+
+    public static String buildOrString(CommonTreeWithLines node)
+    {
+	String retval = "";
+	for(int i = 0; i < node.getChildCount(); i++)
+	    {
+		if(i > 0) retval += " || ";
+		CommonTreeWithLines childNode = (CommonTreeWithLines) node.getChild(i);
+		retval += buildAndString(childNode);
+	    }	
+	return retval;
+    }
+
     public static String buildAndString(CommonTreeWithLines node)
     {
 	String retval = "";
@@ -20,19 +47,7 @@ class TreeToStringConverter
 	    }	
 	return retval;
     }
-    
-    public static String buildOrString(CommonTreeWithLines node)
-    {
-	String retval = "";
-	for(int i = 0; i < node.getChildCount(); i++)
-	    {
-		if(i > 0) retval += " || ";
-		CommonTreeWithLines childNode = (CommonTreeWithLines) node.getChild(i);
-		retval += buildAndString(childNode);
-	    }	
-	return retval;
-    }
-    
+        
     public static String buildExprElemString(CommonTreeWithLines node)
     {
 	String retval = "";
