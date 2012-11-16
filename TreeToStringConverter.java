@@ -4,7 +4,7 @@ class TreeToStringConverter
     public static String buildConditionString(CommonTreeWithLines condition)
     {
 	CommonTreeWithLines andNode = (CommonTreeWithLines) condition.getChild(0);		
-	return buildAndString(andNode);			
+	return buildOrString(andNode);			
     }
     
     public static String buildAndString(CommonTreeWithLines node)
@@ -16,7 +16,7 @@ class TreeToStringConverter
 	    {
 		if(i > 0) retval += " && ";
 		CommonTreeWithLines childNode = (CommonTreeWithLines) node.getChild(i);
-		retval += buildOrString(childNode);
+		retval += buildExprElemString(childNode);
 	    }	
 	return retval;
     }
@@ -28,7 +28,7 @@ class TreeToStringConverter
 	    {
 		if(i > 0) retval += " || ";
 		CommonTreeWithLines childNode = (CommonTreeWithLines) node.getChild(i);
-		retval += buildExprElemString(childNode);
+		retval += buildAndString(childNode);
 	    }	
 	return retval;
     }

@@ -375,7 +375,7 @@ public class CSVExporter {
 	    int numberOfChildren = node.getChildCount();
 	    for(int i = 0; i < numberOfChildren; i++){
 		CommonTreeWithLines andNode = (CommonTreeWithLines) node.getChild(i);
-		handleAndNode(andNode, level, numberOfChildren);
+		handleOrNode(andNode, level, numberOfChildren);
 	    }		
 			
 	}
@@ -402,8 +402,8 @@ public class CSVExporter {
 			
 	    
 	    for(int i = 0; i < node.getChildCount(); i++){
-		CommonTreeWithLines orNode = (CommonTreeWithLines) node.getChild(i);
-		handleOrNode(orNode, level, numberOfChildren);
+		CommonTreeWithLines exprElemNode = (CommonTreeWithLines) node.getChild(i);
+		handleExprElemNode(exprElemNode, level, numberOfChildren);
 	    }					
 	}
 	
@@ -424,8 +424,8 @@ public class CSVExporter {
 	    }
 				    
 	    for(int i = 0; i < numberOfChildren; i++){
-		CommonTreeWithLines exprElemNode = (CommonTreeWithLines) node.getChild(i);
-		handleExprElemNode(exprElemNode, level, numberOfChildren);
+		CommonTreeWithLines andNode = (CommonTreeWithLines) node.getChild(i);
+		handleAndNode(andNode, level, numberOfChildren);
 	    }			
 			
 	}

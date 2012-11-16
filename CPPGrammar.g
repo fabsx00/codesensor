@@ -262,7 +262,7 @@ assignment_expr_l2_elem: (recognized_expr) => recognized_expr
 
 no_brackets: ~('(' | ')');
 no_brackets_curlies_or_squares: ~('(' | ')' | '{' | '}' | '[' | ']');
-no_nesting_semicolon_logical_infix: ~('(' | ')' | '{' | '}' | '[' | ']' | ';' | '&&' | '||'); 
+no_nesting_semicolon_logical_infix: ~('(' | ')' | '{' | '}' | '[' | ']' | ';' | '&&' | '||' | '?' | ':'); 
 no_brackets_or_semicolon: ~('(' | ')' | ';');
 no_angle_brackets_or_brackets : ~('<' | '>' | '(' | ')');
 no_curlies: ~('{' | '}');
@@ -312,7 +312,6 @@ function_call: function_call_ -> ^(FUNCTION_CALL function_call_);
 // Lexer: 
 // List valid characters not yet used in rules
 DOT: '.'; SIZEOF: 'sizeof'; 
-Q_MARK: '?';
 
 ALPHA_NUMERIC : ('a' .. 'z'| 'A' .. 'Z' | '_' | '~')('a' .. 'z'| 'A' .. 'Z' | '_' | '0' .. '9')*;
 DIGITS  : ('0' .. '9')+;
