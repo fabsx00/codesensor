@@ -21,7 +21,7 @@ cd ${BUILD_DIR}
 java -jar ../${ANTLR_JAR} CPPGrammar.g
 
 # Compile java-files
-javac -cp ./${ANTLR_JAR} ./*.java
+javac -cp ./${ANTLR_JAR} ./*.java -Xlint:unchecked
 
 # unpack ANTLR-jar since we need some of the class files
 
