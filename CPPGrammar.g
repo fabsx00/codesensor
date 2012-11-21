@@ -30,7 +30,7 @@ tokens{
   CTOR_INITIALIZER;
   
   NAME; PARAMETER_LIST; PARAMETER_DECL;
-  CALLEE; IDENTIFIER;
+  CALLEE; IDENTIFIER; UNARY_EXPR;
   ARGUMENT_LIST; ARGUMENT; CALL_TEMPLATE_LIST;
   INIT; VAR_DECL; POINTER; TYPE_SUFFIX;
 
@@ -288,27 +288,27 @@ expr_statement_water: ~(ALPHA_NUMERIC | '::' | '(' | ')' | '{' | '}' | '[' | ']'
 //            | function_argument_list -> called_function function_argument_list );
 // called_function: called_function_ -> ^(CALLEE called_function_);
 // called_function_:  ( '(' expr ')' )=> '(' expr ')' | unary_expression;
-// b_ident:  ptr_operator* ('('  b_ident+ ')'  | identifier) (('.' | '->') b_ident)?;
-// primary_expression: ('('  unary_expression+ ')'  | identifier);
+// b_ident:  ptr_operator* ('('  b_ident+ ')'  | identifier) (('.' | '->') b_ident)?; // primary_expression: ('('  unary_expression+ ')'  | identifier);
 
 call_template_list: ('<' template_param_list '>' );
 function_argument_list: function_argument_list_ -> ^(ARGUMENT_LIST function_argument_list_?);
 function_argument_list_: '(' ( function_argument (',' function_argument)* )? ')';
 function_argument: assign_expr -> ^(ARGUMENT assign_expr);
 
-unary_expression:  unary_operator* postfix_expression ;
+unary_expression: unary_expression_ -> ^(UNARY_EXPR unary_expression_);
+unary_expression_:  unary_operator* postfix_expression ;
 
 postfix_expression
 scope{
     CommonTree callTail;
 }
-: ( func_called=callee ((function_call_tail)=> x=function_call_tail {$postfix_expression::callTail = (CommonTree) x.getTree();} (('.'|'->') primary_expression)?)?)
+: ( func_called=callee ((function_call_tail)=> x=function_call_tail {$postfix_expression::callTail = (CommonTree) x.getTree();} tail=postfix_tail?)?)
     -> {$postfix_expression::callTail != null}? ^(FUNCTION_CALL ^(CALLEE $func_called) $x)
-    -> ^(FUNCTION_CALL $func_called)
+    -> $func_called $tail?
 ;
 
 callee: (primary_expression postfix*);
-
+postfix_tail: (('.'|'->') primary_expression);
 
 postfix: ('.' identifier
        	 | '->' identifier
