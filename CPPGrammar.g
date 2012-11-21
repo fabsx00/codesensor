@@ -267,8 +267,8 @@ constant_expr: conditional_expression;
 conditional_expression: (or_expression -> or_expression)
         ('?' condition ':' conditional_expression -> ^(COND_EXPR or_expression '?' condition ':' conditional_expression))?;
 
-or_expression : (x=and_expression  -> and_expression)
-        ('||' y=and_expression -> ^(OR ^(OR_ELEM $x) '||' ^(OR_ELEM $y)))? ; 
+or_expression : (and_expression  -> and_expression)
+        ('||' or_expression -> ^(OR ^(OR_ELEM and_expression) '||' ^(OR_ELEM or_expression)))? ; 
 
 and_expression : (expr_elem+ -> expr_elem+)
         ('&&' and_expression -> ^(AND ^(AND_ELEM expr_elem+) '&&' ^(AND_ELEM and_expression)))?;
