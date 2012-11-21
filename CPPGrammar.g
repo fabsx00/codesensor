@@ -273,27 +273,62 @@ or_expression : (and_expression  -> and_expression)
 and_expression : (expr_elem+ -> expr_elem+)
         ('&&' and_expression -> ^(AND ^(AND_ELEM expr_elem+) '&&' ^(AND_ELEM and_expression)))?;
 
-expr_elem:  (recognized_expr) => recognized_expr
-                | '(' expr ')' -> ^(BRACKETS '(' expr ')')
-                | '[' expr ']' -> ^(SQUARES '[' expr ']')
+
+expr_elem:      (unary_expression) => unary_expression
+                // | '(' expr ')' -> ^(BRACKETS '(' expr ')')
+                // | '[' expr ']' -> ^(SQUARES '[' expr ']')
                 | '{' expr '}' -> ^(CURLIES '{' expr '}')
                 | (expr_statement_water);
 
-expr_statement_water: identifier
-    |  ~(ALPHA_NUMERIC | '::' | '(' | ')' | '{' | '}' | '[' | ']' | ';' | '&&' | '||' | '?' | ':' | ',' | '=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|=');
+expr_statement_water: ~(ALPHA_NUMERIC | '::' | '(' | ')' | '{' | '}' | '[' | ']' | ';' | '&&' | '||' | '?' | ':' | ',' | '=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|=' | '->' | '.');
 
-recognized_expr: function_call;
-function_call_:  called_function ( call_template_list function_argument_list -> called_function ^(CALL_TEMPLATE_LIST call_template_list?) function_argument_list
-                                 | function_argument_list -> called_function function_argument_list )
-    ;
+// function_call: function_call_ -> ^(FUNCTION_CALL function_call_);
+// function_call_:  called_function (call_template_list function_argument_list
+//            -> called_function ^(CALL_TEMPLATE_LIST call_template_list?) function_argument_list
+//            | function_argument_list -> called_function function_argument_list );
+// called_function: called_function_ -> ^(CALLEE called_function_);
+// called_function_:  ( '(' expr ')' )=> '(' expr ')' | unary_expression;
+// b_ident:  ptr_operator* ('('  b_ident+ ')'  | identifier) (('.' | '->') b_ident)?;
+// primary_expression: ('('  unary_expression+ ')'  | identifier);
 
 call_template_list: ('<' template_param_list '>' );
 function_argument_list: function_argument_list_ -> ^(ARGUMENT_LIST function_argument_list_?);
 function_argument_list_: '(' ( function_argument (',' function_argument)* )? ')';
 function_argument: assign_expr -> ^(ARGUMENT assign_expr);
-called_function: called_function_ -> ^(CALLEE called_function_);
-called_function_:  ( '(' expr ')' )=> '(' expr ')' | b_ident;
-b_ident:  ptr_operator* ('('  b_ident+ ')'  | identifier) (('.' | '->') b_ident)?;
+
+unary_expression:  unary_operator* postfix_expression ;
+
+postfix_expression
+scope{
+    CommonTree callTail;
+}
+: ( func_called=callee ((function_call_tail)=> x=function_call_tail {$postfix_expression::callTail = (CommonTree) x.getTree();} (('.'|'->') primary_expression)?)?)
+    -> {$postfix_expression::callTail != null}? ^(FUNCTION_CALL ^(CALLEE $func_called) $x)
+    -> ^(FUNCTION_CALL $func_called)
+;
+
+callee: (primary_expression postfix*);
+
+
+postfix: ('.' identifier
+       	 | '->' identifier
+       	 | '[' expr ']');
+
+
+function_call_tail: call_template_list function_argument_list
+                  | function_argument_list
+                  ;
+
+primary_expression: ('(' expr ')' | identifier); // need to add constants here
+
+unary_operator
+	: '&'
+	| '*'
+	| '+'
+	| '-'
+	| '~'
+	| '!'
+	;
 
 // water
 
@@ -347,7 +382,6 @@ init_decl_name: init_decl_name_ -> ^(NAME init_decl_name_);
 
 include_directive: include_directive_ -> ^(INCLUDE_DIRECTIVE include_directive_);
 label: label_ -> ^(LABEL label_);
-function_call: function_call_ -> ^(FUNCTION_CALL function_call_);
 
 // Lexer: 
 // List valid characters not yet used in rules
