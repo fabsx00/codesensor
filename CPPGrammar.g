@@ -407,7 +407,7 @@ number: HEX_LITERAL | DECIMAL_LITERAL | OCTAL_LITERAL;
 // Lexer: 
 // List valid characters not yet used in rules
 
-DOT: '.'; SIZEOF: 'sizeof'; 
+DOT: '.'; // SIZEOF: 'sizeof'; 
 QMARK: '?'; COLON: ':';
 
 ALPHA_NUMERIC : ('a' .. 'z'| 'A' .. 'Z' | '_' | '~')('a' .. 'z'| 'A' .. 'Z' | '_' | '0' .. '9')*;
