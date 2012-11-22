@@ -30,7 +30,7 @@ tokens{
   CTOR_INITIALIZER;
   
   NAME; PARAMETER_LIST; PARAMETER_DECL;
-  CALLEE; IDENTIFIER; UNARY_EXPR;
+  CALLEE; IDENTIFIER;
   ARGUMENT_LIST; ARGUMENT; CALL_TEMPLATE_LIST;
   INIT; VAR_DECL; POINTER; TYPE_SUFFIX;
 
@@ -306,8 +306,7 @@ function_argument_list: function_argument_list_ -> ^(ARGUMENT_LIST function_argu
 function_argument_list_: '(' ( function_argument (',' function_argument)* )? ')';
 function_argument: assign_expr -> ^(ARGUMENT assign_expr);
 
-unary_expression: unary_expression_ -> ^(UNARY_EXPR unary_expression_);
-unary_expression_:  unary_operator* postfix_expression ;
+unary_expression:  unary_operator* postfix_expression ;
 
 postfix_expression
 scope{
