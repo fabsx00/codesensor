@@ -223,7 +223,7 @@ iteration_statement_: for_statement | while_statement | do_statement;
 jump_statement_: ( break_or_continue | return_statement |goto_statement ) ';';
 break_or_continue: (k='break' | k='continue') -> ^(KEYWORD $k) ^(DESTINATION);
 return_statement: k='return' expr? -> ^(KEYWORD $k) ^(DESTINATION expr?);
-goto_statement:  k='goto' ( d=ALPHA_NUMERIC|  d=DIGITS) -> ^(KEYWORD $k) ^(DESTINATION $d?);
+goto_statement:  k='goto' ( d=identifier) -> ^(KEYWORD $k) ^(DESTINATION $d?);
 
 try_block: 'try' compound_statement;
 catch_block: 'catch' '('param_decl_specifiers parameter_name? ')' compound_statement;
@@ -240,7 +240,7 @@ do_statement: k='do' statement 'while' '(' expr ')' -> ^(KEYWORD $k) '(' ^(CONDI
 
 for_init_statement : (simple_decl) => simple_decl | expr? ';';
 
-label_: (('case'? (identifier | DIGITS) ) | access_specifier) ':' ;
+label_: (('case'? (identifier | number) ) | access_specifier) ':' ;
 
 type_id_list: no_brackets* ('(' type_id_list ')' no_brackets*)*;
 namespace_def_: 'namespace' identifier? '{' namespace_content '}';
@@ -284,8 +284,7 @@ inclusive_or_expression: (exclusive_or_expression -> exclusive_or_expression) ('
 exclusive_or_expression: bit_and_expression ('^' exclusive_or_expression)?;
 
 
-bit_and_expression:
-            (equality_expression -> equality_expression)  (('&')=>( '&' bit_and_expression))?;
+bit_and_expression: equality_expression ('&' bit_and_expression)?;
 
 equality_expression: relational_expression (('=='| '!=') equality_expression)?;
 
@@ -298,10 +297,9 @@ additive_expression: multiplicative_expression ('+' additive_expression)?;
 
 multiplicative_expression: cast_expression ( ('*'| '/'| '%') cast_expression)?;
 
-// This is where we cheat: Since we can't differentiate typenames
-// and identifiers, our parser will recognize casts as calls
-// to (type_name). That's fine in terms of interpretation though.
-cast_expression: unary_expression;
+cast_expression: (('(' type_name ptr_operator* ')') => '(' type_name ptr_operator* ')' cast_expression)
+    | unary_expression
+    ;
 
 call_template_list: ('<' template_param_list '>' );
 function_argument_list: function_argument_list_ -> ^(ARGUMENT_LIST function_argument_list_?);
@@ -332,7 +330,7 @@ function_call_tail: call_template_list function_argument_list
                   | function_argument_list
                   ;
 
-primary_expression: ('(' expr ')' | identifier); // need to add constants here
+primary_expression: ('(' expr ')' | identifier | constant);
 
 unary_operator
 	: '&'
@@ -342,6 +340,14 @@ unary_operator
 	| '~'
 	| '!'
 	;
+
+constant
+    :   HEX_LITERAL
+    |   OCTAL_LITERAL
+    |   DECIMAL_LITERAL
+	|	STRING
+    |   FLOATING_POINT_LITERAL
+    ;
 
 // water
 
@@ -396,6 +402,8 @@ init_decl_name: init_decl_name_ -> ^(NAME init_decl_name_);
 include_directive: include_directive_ -> ^(INCLUDE_DIRECTIVE include_directive_);
 label: label_ -> ^(LABEL label_);
 
+number: HEX_LITERAL | DECIMAL_LITERAL | OCTAL_LITERAL;
+
 // Lexer: 
 // List valid characters not yet used in rules
 
@@ -403,7 +411,7 @@ DOT: '.'; SIZEOF: 'sizeof';
 QMARK: '?'; COLON: ':';
 
 ALPHA_NUMERIC : ('a' .. 'z'| 'A' .. 'Z' | '_' | '~')('a' .. 'z'| 'A' .. 'Z' | '_' | '0' .. '9')*;
-DIGITS  : ('0' .. '9')+;
+// DIGITS  : ('0' .. '9')+;
 
 // stuff we want to discard, no matter what.
 
@@ -418,10 +426,35 @@ COMMENT :       '/*'  ( options {greedy=false;} : .)* '*/'
 STRING: ('\'' ( ('\\' . ) | ~('\\' | '\'') )* '\'' ) // { $channel = HIDDEN; };
         |('"'  ( ('\\' . ) | ~('\\' | '"') )* '"') ; // { $channel = HIDDEN; };
 
-
 PREPROC
     : '#'  ( options {greedy=false; }: .)* ~('\\') '\n' {$channel = HIDDEN; }
     ;
+
+HEX_LITERAL : '0' ('x'|'X') HexDigit+ IntegerTypeSuffix? ;
+DECIMAL_LITERAL : ('0' | '1'..'9' '0'..'9'*) IntegerTypeSuffix? ;
+OCTAL_LITERAL : '0' ('0'..'7')+ IntegerTypeSuffix? ;
+
+fragment
+HexDigit : ('0'..'9'|'a'..'f'|'A'..'F') ;
+
+fragment
+IntegerTypeSuffix
+	:	('u'|'U')? ('l'|'L')
+	|	('u'|'U')  ('l'|'L')?
+	;
+
+FLOATING_POINT_LITERAL
+    :   ('0'..'9')+ '.' ('0'..'9')* Exponent? FloatTypeSuffix?
+    |   '.' ('0'..'9')+ Exponent? FloatTypeSuffix?
+    |   ('0'..'9')+ Exponent FloatTypeSuffix?
+    |   ('0'..'9')+ Exponent? FloatTypeSuffix
+	;
+
+fragment
+Exponent : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
+
+fragment
+FloatTypeSuffix : ('f'|'F'|'d'|'D') ;
 
 WHITESPACE: (' ' | '\t' | '\n' | '\r')+ {$channel = HIDDEN; };
 OTHER : .  {$channel = HIDDEN;};
