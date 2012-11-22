@@ -46,6 +46,8 @@ tokens{
   CLASS_NAME; TYPE_DEF; BASE_CLASSES;
   CLASS_CONTENT; TYPE_NAME; TYPE; INIT_DECL_LIST;
 
+  BIT_OR; BIT_OR_ELEM;
+
   BRACKETS; CURLIES; SQUARES;
   AND; OR; COND_EXPR; OR_ELEM; AND_ELEM;
   ASSIGN; ASSIGN_OP; LVAL; RVAL;
@@ -270,17 +272,46 @@ conditional_expression: (or_expression -> or_expression)
 or_expression : (and_expression  -> and_expression)
         ('||' or_expression -> ^(OR ^(OR_ELEM and_expression) '||' ^(OR_ELEM or_expression)))? ; 
 
-and_expression : (expr_elem+ -> expr_elem+)
-        ('&&' and_expression -> ^(AND ^(AND_ELEM expr_elem+) '&&' ^(AND_ELEM and_expression)))?;
+and_expression : (inclusive_or_expression -> inclusive_or_expression)
+        ('&&' and_expression -> ^(AND ^(AND_ELEM inclusive_or_expression) '&&' ^(AND_ELEM and_expression)))?;
 
 
+inclusive_or_expression: (exclusive_or_expression -> exclusive_or_expression) ('|' inclusive_or_expression
+            -> ^(BIT_OR ^(BIT_OR_ELEM exclusive_or_expression) '|' ^(BIT_OR_ELEM inclusive_or_expression)))?;
+
+
+exclusive_or_expression: bit_and_expression ('^' exclusive_or_expression)?;
+
+
+bit_and_expression:
+            (equality_expression -> equality_expression)  (('&')=>( '&' bit_and_expression))?;
+
+equality_expression: relational_expression (('=='| '!=') equality_expression)?;
+
+relational_expression: shift_expression
+        (('<'|'>'|'<='|'>=') relational_expression)?;
+
+shift_expression: additive_expression ( ('<<'|'>>') shift_expression)?;
+
+additive_expression: multiplicative_expression ('+' additive_expression)?;
+
+multiplicative_expression: cast_expression ( ('*'| '/'| '%') cast_expression)?;
+
+// This is where we cheat: Since we can't differentiate typenames
+// and identifiers, our parser will recognize casts as calls
+// to (type_name). That's fine in terms of interpretation though.
+cast_expression: unary_expression;
+
+/*
 expr_elem:      (unary_expression) => unary_expression
                 // | '(' expr ')' -> ^(BRACKETS '(' expr ')')
                 // | '[' expr ']' -> ^(SQUARES '[' expr ']')
                 | '{' expr '}' -> ^(CURLIES '{' expr '}')
                 | (expr_statement_water);
 
-expr_statement_water: ~(ALPHA_NUMERIC | '::' | '(' | ')' | '{' | '}' | '[' | ']' | ';' | '&&' | '||' | '?' | ':' | ',' | '=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|=' | '->' | '.');
+expr_statement_water: ~(ALPHA_NUMERIC | '::' | '(' | ')' | '{' | '}' | '[' | ']' | ';' | '&&' | '||' | '?' | ':' | ',' | '=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|=' | '->' | '.'
+| '|');
+*/
 
 // function_call: function_call_ -> ^(FUNCTION_CALL function_call_);
 // function_call_:  called_function (call_template_list function_argument_list
