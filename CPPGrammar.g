@@ -45,6 +45,7 @@ tokens{
   CTOR_EXPR; FUNCTION_CALL; CLASS_DEF;
   CLASS_NAME; TYPE_DEF; BASE_CLASSES;
   CLASS_CONTENT; TYPE_NAME; TYPE; INIT_DECL_LIST;
+  NON_FUNC_CALL;
 
   BIT_OR; BIT_OR_ELEM;
 
@@ -302,25 +303,6 @@ multiplicative_expression: cast_expression ( ('*'| '/'| '%') cast_expression)?;
 // to (type_name). That's fine in terms of interpretation though.
 cast_expression: unary_expression;
 
-/*
-expr_elem:      (unary_expression) => unary_expression
-                // | '(' expr ')' -> ^(BRACKETS '(' expr ')')
-                // | '[' expr ']' -> ^(SQUARES '[' expr ']')
-                | '{' expr '}' -> ^(CURLIES '{' expr '}')
-                | (expr_statement_water);
-
-expr_statement_water: ~(ALPHA_NUMERIC | '::' | '(' | ')' | '{' | '}' | '[' | ']' | ';' | '&&' | '||' | '?' | ':' | ',' | '=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|=' | '->' | '.'
-| '|');
-*/
-
-// function_call: function_call_ -> ^(FUNCTION_CALL function_call_);
-// function_call_:  called_function (call_template_list function_argument_list
-//            -> called_function ^(CALL_TEMPLATE_LIST call_template_list?) function_argument_list
-//            | function_argument_list -> called_function function_argument_list );
-// called_function: called_function_ -> ^(CALLEE called_function_);
-// called_function_:  ( '(' expr ')' )=> '(' expr ')' | unary_expression;
-// b_ident:  ptr_operator* ('('  b_ident+ ')'  | identifier) (('.' | '->') b_ident)?; // primary_expression: ('('  unary_expression+ ')'  | identifier);
-
 call_template_list: ('<' template_param_list '>' );
 function_argument_list: function_argument_list_ -> ^(ARGUMENT_LIST function_argument_list_?);
 function_argument_list_: '(' ( function_argument (',' function_argument)* )? ')';
@@ -334,8 +316,8 @@ scope{
     CommonTree callTail;
 }
 : ( func_called=callee ((function_call_tail)=> x=function_call_tail {$postfix_expression::callTail = (CommonTree) x.getTree();} tail=postfix_tail?)?)
-    -> {$postfix_expression::callTail != null}? ^(FUNCTION_CALL ^(CALLEE $func_called) $x)
-    -> $func_called $tail?
+    -> {$postfix_expression::callTail != null}? ^(FUNCTION_CALL ^(CALLEE $func_called) $x) $tail?
+    -> ^(NON_FUNC_CALL $func_called $tail?)?
 ;
 
 callee: (primary_expression postfix*);
