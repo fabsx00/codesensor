@@ -30,7 +30,7 @@ tokens{
   CTOR_INITIALIZER;
   
   NAME; PARAMETER_LIST; PARAMETER_DECL;
-  CALLEE; IDENTIFIER;
+  CALLEE;
   ARGUMENT_LIST; ARGUMENT; CALL_TEMPLATE_LIST;
   INIT; VAR_DECL; POINTER; TYPE_SUFFIX;
 
@@ -378,8 +378,7 @@ operator: (('new' | 'delete' ) ('[' ']')?)
 
 assignment_operator: '=' | '*=' | '/=' | '%=' | '+=' | '-=' | '<<=' | '>>=' | '&=' | '^=' | '|='; 
 
-identifier: identifier_ -> ^(IDENTIFIER identifier_);
-identifier_ : ALPHA_NUMERIC ('::' ALPHA_NUMERIC)*;
+identifier : ALPHA_NUMERIC ('::' ALPHA_NUMERIC)*;
 
 water : ~OTHER;
 
