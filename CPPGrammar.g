@@ -268,7 +268,7 @@ assign_expr: (conditional_expression -> conditional_expression )
 
 constant_expr: conditional_expression;
 conditional_expression: (or_expression -> or_expression)
-        ('?' condition ':' conditional_expression -> ^(COND_EXPR or_expression '?' condition ':' conditional_expression))?;
+        ('?' condition ':' conditional_expression -> ^(COND_EXPR condition '?' or_expression ':' conditional_expression))?;
 
 or_expression : (and_expression  -> and_expression)
         ('||' or_expression -> ^(OR ^(OR_ELEM and_expression) '||' ^(OR_ELEM or_expression)))? ; 
