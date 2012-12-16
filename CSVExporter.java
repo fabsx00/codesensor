@@ -57,10 +57,6 @@ public class CSVExporter {
 	CPPGrammarLexer lexer = new CPPGrammarLexer(antlrFileStream);
 	TokenStream tokenStream = new CommonTokenStream(lexer);
 	CPPGrammarParser parser = new CPPGrammarParser(tokenStream );
-	parser.setTreeAdaptor(new CommonTreeAdaptor()
-	    {
-		public Object create(Token payload) { return new CommonTreeWithLines(payload);}
-	    });
 	return parser.code();
     }
     
