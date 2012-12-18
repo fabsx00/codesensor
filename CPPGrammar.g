@@ -45,7 +45,7 @@ tokens{
   CTOR_EXPR; FUNCTION_CALL; CLASS_DEF;
   CLASS_NAME; TYPE_DEF; BASE_CLASSES;
   CLASS_CONTENT; TYPE_NAME; TYPE; INIT_DECL_LIST;
-  UNARY_EXPR;
+  UNARY_EXPR; NON_FUNC_CALL;
 
   BIT_OR; BIT_OR_ELEM;
 
@@ -314,7 +314,7 @@ scope{
 }
 : ( func_called=callee ((function_call_tail)=> x=function_call_tail {$postfix_expression::callTail = (CommonTree) x.getTree();} tail=postfix_tail?)?)
     -> {$postfix_expression::callTail != null}? ^(FUNCTION_CALL ^(CALLEE $func_called) $x) $tail?
-    -> ($func_called $tail?)?
+    -> ^(NON_FUNC_CALL $func_called $tail?)?
 ;
 
 callee: (primary_expression postfix*);
