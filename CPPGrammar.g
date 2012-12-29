@@ -307,6 +307,8 @@ function_argument_list_: '(' ( function_argument (',' function_argument)* )? ')'
 function_argument: assign_expr -> ^(ARGUMENT assign_expr);
 
 unary_expression: (postfix_expression -> postfix_expression)
+| '--' unary_expression -> ^(UNARY_EXPR '--' unary_expression)
+| '++' unary_expression -> ^(UNARY_EXPR '++' unary_expression)
 | (unary_operator+ postfix_expression) -> ^(UNARY_EXPR unary_operator+ postfix_expression);
 
 postfix_expression
