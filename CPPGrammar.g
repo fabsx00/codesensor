@@ -30,8 +30,7 @@ tokens{
   CTOR_INITIALIZER;
   
   NAME; PARAMETER_LIST; PARAMETER_DECL;
-  CALLEE;
-  ARGUMENT_LIST; ARGUMENT; CALL_TEMPLATE_LIST;
+  CALLEE; ARGUMENT; CALL_TEMPLATE_LIST;
   INIT; VAR_DECL; POINTER; TYPE_SUFFIX;
 
   SIMPLE_DECL; NAMESPACE_DEF; USING_DIRECTIVE;
@@ -45,13 +44,17 @@ tokens{
   CTOR_EXPR; FUNCTION_CALL; CLASS_DEF;
   CLASS_NAME; TYPE_DEF; BASE_CLASSES;
   CLASS_CONTENT; TYPE_NAME; TYPE; INIT_DECL_LIST;
-  UNARY_EXPR; UNARY_OPERATOR; FIELD;
+  UNARY_EXPR; UNARY_OPERATOR; FIELD; EXPR;
 
   BIT_OR; BIT_OR_ELEM;
 
   BRACKETS; CURLIES; SQUARES;
-  AND; OR; COND_EXPR; OR_ELEM; AND_ELEM;
+  AND; OR; COND_EXPR;
   ASSIGN; ASSIGN_OP; LVAL; RVAL;
+
+  EQUALITY_EXPR; RELATIONAL_EXPR;
+  EQ_OPERATOR; REL_OPERATOR;
+
 }
 
 code  : part* -> ^(SOURCE_FILE part*);
@@ -261,7 +264,9 @@ template_param_list_elem:  ('<' template_param_list '>')
 // Expressions
 
 condition_: expr;
-expr: assign_expr (',' assign_expr)?;
+
+expr: expr_ -> ^(EXPR expr_);
+expr_: assign_expr (',' assign_expr)?;
 
 assign_expr: (conditional_expression -> conditional_expression )
         (assignment_operator assign_expr -> ^(ASSIGN ^(LVAL conditional_expression) ^(ASSIGN_OP assignment_operator) ^(RVAL assign_expr)))?;
@@ -271,10 +276,10 @@ conditional_expression: (or_expression -> or_expression)
         ('?' condition ':' conditional_expression -> ^(COND_EXPR condition '?' or_expression ':' conditional_expression))?;
 
 or_expression : (and_expression  -> and_expression)
-        ('||' or_expression -> ^(OR ^(OR_ELEM and_expression) '||' ^(OR_ELEM or_expression)))? ; 
+        ('||' or_expression -> ^(OR ^(EXPR and_expression) '||' ^(EXPR or_expression)))? ; 
 
 and_expression : (inclusive_or_expression -> inclusive_or_expression)
-        ('&&' and_expression -> ^(AND ^(AND_ELEM inclusive_or_expression) '&&' ^(AND_ELEM and_expression)))?;
+        ('&&' and_expression -> ^(AND ^(EXPR inclusive_or_expression) '&&' ^(EXPR and_expression)))?;
 
 
 inclusive_or_expression: (exclusive_or_expression -> exclusive_or_expression) ('|' inclusive_or_expression
@@ -286,10 +291,17 @@ exclusive_or_expression: bit_and_expression ('^' exclusive_or_expression)?;
 
 bit_and_expression: equality_expression ('&' bit_and_expression)?;
 
-equality_expression: relational_expression (('=='| '!=') equality_expression)?;
+equality_expression: (relational_expression -> relational_expression)
+        (equality_operator equality_expression -> ^(EQUALITY_EXPR relational_expression equality_operator equality_expression))?;
 
-relational_expression: shift_expression
-        (('<'|'>'|'<='|'>=') relational_expression)?;
+equality_operator: equality_operator_ -> ^(EQ_OPERATOR equality_operator_);
+equality_operator_: ('=='| '!=');
+
+relational_expression: (shift_expression -> shift_expression)
+        (relational_operator relational_expression -> ^(RELATIONAL_EXPR shift_expression relational_operator relational_expression) )?;
+
+relational_operator: relational_operator_ -> ^(REL_OPERATOR relational_operator_);
+relational_operator_: ('<'|'>'|'<='|'>=');
 
 shift_expression: additive_expression ( ('<<'|'>>') shift_expression)?;
 
@@ -302,14 +314,15 @@ cast_expression: (('(' type_name ptr_operator* ')') => '(' type_name ptr_operato
     ;
 
 call_template_list: ('<' template_param_list '>' );
-function_argument_list: function_argument_list_ -> ^(ARGUMENT_LIST function_argument_list_?);
-function_argument_list_: '(' ( function_argument (',' function_argument)* )? ')';
+
+function_argument_list: '(' ( function_argument (',' function_argument)* )? ')';
 function_argument: assign_expr -> ^(ARGUMENT assign_expr);
 
 unary_expression: (postfix_expression -> postfix_expression)
-| '--' unary_expression -> ^(UNARY_EXPR '--' unary_expression)
-| '++' unary_expression -> ^(UNARY_EXPR '++' unary_expression)
-| (unary_operator+ postfix_expression) -> ^(UNARY_EXPR unary_operator+ postfix_expression);
+| '--' unary_expression
+| '++' unary_expression
+| (unary_operator+ postfix_expression) -> ^(UNARY_EXPR unary_operator+ postfix_expression)
+;
 
 postfix_expression
 scope{
