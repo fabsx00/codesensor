@@ -52,7 +52,6 @@ tokens{
   AND; OR; COND_EXPR;
   ASSIGN; ASSIGN_OP; LVAL; RVAL;
 
-  EQUALITY_EXPR; RELATIONAL_EXPR;
   EQ_OPERATOR; REL_OPERATOR;
 
 }
@@ -291,14 +290,12 @@ exclusive_or_expression: bit_and_expression ('^' exclusive_or_expression)?;
 
 bit_and_expression: equality_expression ('&' bit_and_expression)?;
 
-equality_expression: (relational_expression -> relational_expression)
-        (equality_operator equality_expression -> ^(EQUALITY_EXPR relational_expression equality_operator equality_expression))?;
+equality_expression: relational_expression (equality_operator equality_expression)?;
 
 equality_operator: equality_operator_ -> ^(EQ_OPERATOR equality_operator_);
 equality_operator_: ('=='| '!=');
 
-relational_expression: (shift_expression -> shift_expression)
-        (relational_operator relational_expression -> ^(RELATIONAL_EXPR shift_expression relational_operator relational_expression) )?;
+relational_expression: shift_expression (relational_operator relational_expression)?;
 
 relational_operator: relational_operator_ -> ^(REL_OPERATOR relational_operator_);
 relational_operator_: ('<'|'>'|'<='|'>=');
