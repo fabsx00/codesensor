@@ -331,7 +331,9 @@ scope{
 ;
 
 callee: (primary_expression postfix*);
-postfix_tail: (('.'|'->') primary_expression);
+postfix_tail: (('.'|'->') primary_expression)
+            | '[' primary_expression ']'
+;
 
 postfix: ('.' identifier
        	 | '->' identifier
