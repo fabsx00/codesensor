@@ -302,7 +302,7 @@ relational_operator_: ('<'|'>'|'<='|'>=');
 
 shift_expression: additive_expression ( ('<<'|'>>') shift_expression)?;
 
-additive_expression: multiplicative_expression ('+' additive_expression)?;
+additive_expression: multiplicative_expression (('+'| '-') additive_expression)?;
 
 multiplicative_expression: cast_expression ( ('*'| '/'| '%') cast_expression)?;
 
@@ -324,10 +324,12 @@ unary_expression: (postfix_expression -> postfix_expression)
 postfix_expression
 scope{
     CommonTree callTail;
+    Token openingBracket;
 }
 : ( func_called=callee ((function_call_tail)=> x=function_call_tail {$postfix_expression::callTail = (CommonTree) x.getTree();} tail=postfix_tail?)?)
     -> {$postfix_expression::callTail != null}? ^(FUNCTION_CALL ^(CALLEE $func_called) $x) $tail?
-    -> ^(FIELD $func_called $tail?)?
+    -> {$postfix_expression::openingBracket == null}? ^(FIELD $func_called $tail?)?
+    -> ($func_called $tail?)?
 ;
 
 callee: (primary_expression postfix*);
@@ -347,7 +349,7 @@ function_call_tail: call_template_list function_argument_list
                   | function_argument_list
                   ;
 
-primary_expression: ('(' expr ')' | identifier | constant);
+primary_expression: (x='(' expr_ ')' | identifier | constant) { if(x != null) $postfix_expression::openingBracket = x; } ;
 
 unary_operator: unary_operator_ -> ^(UNARY_OPERATOR unary_operator_);
 
