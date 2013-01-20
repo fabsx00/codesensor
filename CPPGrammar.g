@@ -318,7 +318,7 @@ function_argument: assign_expr -> ^(ARGUMENT assign_expr);
 unary_expression: (postfix_expression -> postfix_expression)
 | '--' unary_expression
 | '++' unary_expression
-| (unary_operator+ postfix_expression) -> ^(UNARY_EXPR unary_operator+ postfix_expression)
+| (unary_operator+ postfix_expression) -> ^(UNARY_EXPR unary_operator+ ^(EXPR postfix_expression))
 ;
 
 postfix_expression
